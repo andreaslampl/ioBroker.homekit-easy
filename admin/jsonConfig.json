@@ -53,6 +53,15 @@
       "newLine": true,
       "xs": 12,
       "sm": 4
+    },
+    "alexaPort": {
+      "type": "port",
+      "label": "Alexa port",
+      "default": 80,
+      "help": "Echo devices only find the bridge on port 80; change only for tests",
+      "newLine": true,
+      "xs": 12,
+      "sm": 3
     }
   }
 }

@@ -1,24 +1,33 @@
 'use strict';
 
 const os = require('node:os');
+const fs = require('node:fs');
+const path = require('node:path');
+const crypto = require('node:crypto');
 const utils = require('@iobroker/adapter-core');
 const { HomekitBridge } = require('./lib/bridge');
 const { TYPES, catalog } = require('./lib/devices');
 const { cameraTypes } = require('./lib/camera');
 const { DeviceStore } = require('./lib/store');
 const { SetupServer } = require('./lib/server');
+const { HueBridge } = require('./lib/hue');
+const { ALEXA_TYPES, alexaLights } = require('./lib/alexa');
 
 const CAMERA_ID = /^livecam\.\d+\.cameras\.[^.]+$/;
 
 function localAddress() {
+    return localInterface().address;
+}
+
+function localInterface() {
     for (const list of Object.values(os.networkInterfaces())) {
         for (const a of list || []) {
             if (a.family === 'IPv4' && !a.internal) {
-                return a.address;
+                return a;
             }
         }
     }
-    return '127.0.0.1';
+    return { address: '127.0.0.1', mac: '' };
 }
 
 function truthy(v) {
@@ -65,6 +74,8 @@ class HomekitEasy extends utils.Adapter {
             meta: id => this.meta.get(id) || {},
             set: (id, val) => this.write(id, val).catch(err => this.log.warn(`HomeKit -> ${id}: ${err.message}`)),
         };
+        this.x = x;
+        this.dir = dir;
         this.bridge = new HomekitBridge({
             dir,
             name: this.config.bridgeName || 'ioBroker',
@@ -90,7 +101,11 @@ class HomekitEasy extends utils.Adapter {
             accessKey: key,
             log: this.log,
             adapter: {
-                catalog: () => [...catalog(), ...Object.entries(extraTypes).map(([type, t]) => ({ type, label: t.label, group: t.group, fields: t.fields, options: t.options }))],
+                catalog: () =>
+                    [...catalog(), ...Object.entries(extraTypes).map(([type, t]) => ({ type, label: t.label, group: t.group, fields: t.fields, options: t.options }))].map(c => ({
+                        ...c,
+                        alexa: Boolean(ALEXA_TYPES[c.type]),
+                    })),
                 devices: () => this.store.devices,
                 saveDevices: list => this.saveDevices(list),
                 objectList: fresh => this.objectList(fresh),
@@ -102,6 +117,7 @@ class HomekitEasy extends utils.Adapter {
                     pincode: this.bridge.identity.pincode,
                     setupURI: this.bridge.setupURI,
                     devices: this.bridge.accessories.size,
+                    alexa: this.alexaInfo(),
                 }),
                 resetPairing: () => this.resetPairing(),
             },
@@ -114,6 +130,7 @@ class HomekitEasy extends utils.Adapter {
         const host = String(this.config.publicHost || '').trim() || localAddress();
         await this.setState('info.setupUrl', `http://${host}:${port}/${key ? `?key=${encodeURIComponent(key)}` : ''}`, true);
         await this.setState('info.devices', this.bridge.accessories.size, true);
+        await this.startAlexa();
         await this.setState('info.connection', true, true);
         this.log.info(`HomeKit bridge "${this.bridge.name}" running with ${this.bridge.accessories.size} device(s); setup page http://${host}:${port}/`);
     }
@@ -123,6 +140,7 @@ class HomekitEasy extends utils.Adapter {
         await this.readMeta(devices);
         this.bridge.update(devices);
         await this.resubscribe();
+        await this.startAlexa();
         await this.setState('info.devices', this.bridge.accessories.size, true);
         return devices;
     }
@@ -131,6 +149,75 @@ class HomekitEasy extends utils.Adapter {
         await this.bridge.resetPairing(this.store.devices);
         await this.resubscribe();
         await this.setState('info.paired', false, true);
+    }
+
+    // ---------------- Alexa (Hue emulation, lib/hue.js) ----------------
+
+    /** alexa.json: bridge MAC and the light number of every device (Alexa remembers the numbers). */
+    alexaData() {
+        if (!this.alexaStore) {
+            const file = path.join(this.dir, 'alexa.json');
+            let data = {};
+            try {
+                data = JSON.parse(fs.readFileSync(file, 'utf8'));
+            } catch {
+                // new
+            }
+            const mac = String(localInterface().mac || '').replace(/:/g, '');
+            data.mac = /^[0-9a-f]{12}$/i.test(String(data.mac || '')) ? data.mac : /^[0-9a-f]{12}$/i.test(mac) && mac !== '000000000000' ? mac : crypto.randomBytes(6).toString('hex');
+            data.ids = data.ids && typeof data.ids === 'object' ? data.ids : {};
+            this.alexaStore = { file, data };
+            this.saveAlexaData();
+        }
+        return this.alexaStore.data;
+    }
+
+    saveAlexaData() {
+        fs.writeFileSync(this.alexaStore.file, JSON.stringify(this.alexaStore.data, null, 1));
+    }
+
+    alexaId(deviceId) {
+        const data = this.alexaData();
+        if (!data.ids[deviceId]) {
+            data.ids[deviceId] = String(Math.max(0, ...Object.values(data.ids).map(Number)) + 1);
+            this.saveAlexaData();
+        }
+        return data.ids[deviceId];
+    }
+
+    alexaLights() {
+        return alexaLights(this.store.devices, this.x, id => this.alexaId(id));
+    }
+
+    /** Start the Hue emulation as soon as one device is meant for Alexa. */
+    async startAlexa() {
+        if (this.hue || this.alexaError || !this.store.devices.some(d => d.alexa && ALEXA_TYPES[d.type])) {
+            return;
+        }
+        const port = Number(this.config.alexaPort) || 80;
+        const host = String(this.config.publicHost || '').trim();
+        const ip = /^\d+\.\d+\.\d+\.\d+$/.test(host) ? host : localAddress();
+        const hue = new HueBridge({ ip, port, mac: this.alexaData().mac, name: this.config.bridgeName || 'ioBroker', lights: () => this.alexaLights(), log: this.log, ssdpPort: this.ssdpPort });
+        try {
+            await hue.start();
+            this.hue = hue;
+            this.log.info(`Alexa: ready on http://${ip}:${hue.port}/ - say "Alexa, suche Geräte"`);
+        } catch (err) {
+            this.alexaError = err.code === 'EADDRINUSE' ? `Port ${port} ist schon belegt` : err.code === 'EACCES' ? `Port ${port} darf nicht geöffnet werden (Rechte)` : err.message;
+            this.log.error(`Alexa: cannot open port ${port}: ${err.message}`);
+        }
+    }
+
+    alexaInfo() {
+        const devices = this.store.devices.filter(d => d.alexa && ALEXA_TYPES[d.type]).length;
+        return {
+            devices,
+            running: Boolean(this.hue),
+            error: this.alexaError || '',
+            port: this.hue ? this.hue.port : Number(this.config.alexaPort) || 80,
+            lastSeen: this.hue && this.hue.lastSeen ? this.hue.lastSeen.at : null,
+            lastFrom: this.hue && this.hue.lastSeen ? this.hue.lastSeen.from : '',
+        };
     }
 
     /** Object type/min/max of all data points of the devices (before building them). */
@@ -264,6 +351,9 @@ class HomekitEasy extends utils.Adapter {
         try {
             if (this.server) {
                 await this.server.close();
+            }
+            if (this.hue) {
+                await this.hue.stop();
             }
             if (this.bridge) {
                 await this.bridge.stop();

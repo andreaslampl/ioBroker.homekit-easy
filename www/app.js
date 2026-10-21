@@ -49,6 +49,7 @@ function dirty() {
 
 async function loadPairing() {
   const p = await api('pairing');
+  if (p.alexa) renderAlexa(p.alexa);
   const box = $('pairing');
   $('pairState').textContent = p.paired ? 'Gekoppelt' : 'Nicht gekoppelt';
   $('pairState').className = 'badge' + (p.paired ? ' ok' : '');
@@ -65,6 +66,21 @@ async function loadPairing() {
     toast('Kopplung zurückgesetzt – neuer Code');
     loadPairing();
   };
+}
+
+function renderAlexa(a) {
+  const box = $('alexa');
+  const since = a.lastSeen ? Math.round((Date.now() - a.lastSeen) / 60000) : null;
+  let status;
+  if (a.error) status = '<p class="bad">Alexa kann nicht starten: ' + esc(a.error) + '. Siehe Anleitung (Port ' + a.port + ').</p>';
+  else if (!a.devices) status = '<p class="muted">Noch kein Gerät für Alexa. Beim Gerät den Haken <b>„auch für Alexa“</b> setzen und speichern.</p>';
+  else if (!a.running) status = '<p class="muted">Startet …</p>';
+  else status = '<p class="ok">● bereit – ' + a.devices + ' Gerät(e) für Alexa</p>' +
+    (since === null ? '<p class="muted">Noch kein Echo hat nachgefragt.</p>' : '<p class="muted">Echo zuletzt ' + (since < 1 ? 'gerade eben' : 'vor ' + since + ' min') + ' (' + esc(a.lastFrom) + ')</p>');
+  box.innerHTML = '<h2>Alexa (Sprachsteuerung)</h2>' + status +
+    '<ol><li>Beim Gerät <b>„auch für Alexa“</b> anhaken, speichern.</li><li>Zum Echo sagen: <b>„Alexa, suche Geräte“</b> (oder Alexa-App → Geräte → ＋ → Andere → Geräte suchen).</li>' +
+    '<li>Dann z. B. „Alexa, Licht Wohnzimmer ein“, „… auf 30 Prozent“. Geräte erscheinen in der Alexa-App als Lampen und gehen auch in Routinen.</li></ol>' +
+    '<p class="muted" style="font-size:13px">Läuft lokal ohne Skill und ohne Cloud. Rollläden: „ein“ = auf, „aus“ = zu, „auf 30 Prozent“ = 30 % offen.</p>';
 }
 
 // ---------------- device list ----------------
@@ -107,7 +123,7 @@ function renderList() {
       const miss = missing(d);
       row.innerHTML = '<span class="ico">' + (ICONS[g] || '🔘') + '</span><div class="txt"><div class="name">' + esc(d.name) + '</div><div class="sub">' +
         esc(t ? t.label : d.type) + ' · ' + esc(mainState(d)) + '</div>' + (miss.length ? '<div class="warn">fehlt: ' + esc(miss.join(', ')) + '</div>' : '') + '</div>' +
-        (d.enabled === false ? '<span class="muted">aus</span>' : '');
+        (d.alexa ? '<span class="tag">Alexa</span>' : '') + (d.enabled === false ? '<span class="muted">nicht in Home</span>' : '');
       row.onclick = () => edit(d);
       list.appendChild(row);
     }
@@ -227,8 +243,8 @@ function edit(original, isNew) {
       d.type = sel.value;
       build();
     };
-    inputs.name = field(sh, 'Name in Apple Home', textInput(d.name), 'Siri versteht diesen Namen, z. B. „Licht Wohnzimmer“.');
     const t = typeOf(d);
+    inputs.name = field(sh, t.alexa ? 'Name (für Siri und Alexa)' : 'Name in Apple Home', textInput(d.name), 'Siri' + (t.alexa ? ' und Alexa verstehen' : ' versteht') + ' diesen Namen, z. B. „Licht Wohnzimmer“.');
     for (const [key, label, mode] of t.fields) {
       if (mode === 'camera') cameraField(sh, label, d[key]).then(s => (inputs[key] = s));
       else inputs[key] = stateField(sh, label, d[key], mode === 'w');
@@ -267,6 +283,22 @@ function edit(original, isNew) {
     en.append(ei, document.createTextNode('in Apple Home anzeigen'));
     sh.appendChild(en);
     inputs.enabled = ei;
+    if (t.alexa) {
+      const al = document.createElement('label');
+      al.className = 'check';
+      const ai = document.createElement('input');
+      ai.type = 'checkbox';
+      ai.checked = Boolean(d.alexa);
+      al.append(ai, document.createTextNode('auch für Alexa (Sprachsteuerung)'));
+      sh.appendChild(al);
+      inputs.alexa = ai;
+      if (d.type === 'blind') {
+        const h = document.createElement('div');
+        h.className = 'help';
+        h.textContent = 'Alexa sieht den Rollladen als Lampe: „ein“ = auf, „aus“ = zu, „auf 30 Prozent“ = 30 % offen.';
+        sh.appendChild(h);
+      }
+    }
 
     const buttons = document.createElement('div');
     buttons.className = 'buttons';
@@ -311,13 +343,13 @@ function edit(original, isNew) {
 
   function collect() {
     const t = typeOf(d);
-    const keep = new Set(['id', 'type', 'name', 'enabled', ...t.fields.map(f => f[0]), ...t.options.map(o => o[0])]);
+    const keep = new Set(['id', 'type', 'name', 'enabled', ...(t.alexa ? ['alexa'] : []), ...t.fields.map(f => f[0]), ...t.options.map(o => o[0])]);
     for (const k of Object.keys(d)) if (!keep.has(k)) delete d[k];
     for (const [key, input] of Object.entries(inputs)) {
       if (input.type === 'checkbox') d[key] = input.checked;
       else if (input.type === 'number') d[key] = input.value === '' ? undefined : Number(input.value);
       else d[key] = input.value.trim();
-      if (d[key] === '' || d[key] === undefined) delete d[key];
+      if (d[key] === '' || d[key] === undefined || (key === 'alexa' && !d[key])) delete d[key];
     }
     d.name = d.name || t.label;
   }
@@ -337,7 +369,7 @@ async function save() {
     dirty();
     renderList();
     loadPairing();
-    toast('Gespeichert – Apple Home ist aktualisiert');
+    toast(devices.some(d => d.alexa) ? 'Gespeichert – für neue Alexa-Geräte „Alexa, suche Geräte“ sagen' : 'Gespeichert – Apple Home ist aktualisiert');
   } catch (e) {
     toast('Speichern fehlgeschlagen: ' + e.message, true);
   }

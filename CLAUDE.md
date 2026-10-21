@@ -21,6 +21,12 @@ just a type + data points picked in an object browser. Setup page on its own por
   Apple Home may only write those (checked in `main.write`). The PIN is never logged.
 - `lib/server.js` – setup page + API (catalog, devices, objects/values for the picker, cameras,
   pairing with QR SVG, reset); optional access key (`?key=` once -> cookie `hke_key`).
+- `lib/hue.js` – Alexa without cloud (0.2.0): emulated Hue bridge API v1 (SSDP on UDP 1900 + HTTP on
+  port 80 - Echo devices insist on 80; description.xml "Philips hue bridge 2012", POST /api user,
+  lights/state PUT {on, bri}); commanded state is reported back for 8 s so Alexa does not say the
+  device does not respond. `lib/alexa.js` maps device types to lamps (light/dimmer/switch/outlet/fan/
+  blind); locks, garage, security deliberately not. Light numbers stable in alexa.json (+ bridge MAC).
+  Starts only when a device has `alexa: true`. Not yet tested with the owner's Echo devices.
 - `www/` – vanilla JS setup page; `picker.js` = same object browser as ioBroker.logik/smartview.
 - `test/` – `node --test`; hap-controller 0.10.2 (devDependency) is a real HomeKit client: pairing,
   read/write, events, snapshot, doorbell event, SRTP stream (needs ffmpeg). Separate files because
@@ -29,6 +35,10 @@ just a type + data points picked in an object browser. Setup page on its own por
 ## Status
 
 - 0.1.0: not yet tested with the owner's iPhone / Apple Home / mDNS on the real network.
+- 0.2.0: owner wants Alexa voice commands simpler than the iot adapter (cloud + Pro subscription) ->
+  "Weg A": local Hue emulation in this adapter, same device list, tick "auch für Alexa". Owner's
+  Alexa routines live in Amazon's cloud and can use these lamps as actions; triggering routines /
+  TTS from ioBroker would be the alexa2 adapter (suggested for later).
 
 ## Conventions
 

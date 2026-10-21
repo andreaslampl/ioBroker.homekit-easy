@@ -7,5 +7,7 @@
   "Address of the ioBroker server for the link (optional)": "Adresse des ioBroker-Servers für den Link (optional)",
   "Access key for the setup page (optional)": "Zugriffsschlüssel für die Einrichtungsseite (optional)",
   "The page shows the HomeKit code - protect it if others use your network": "Die Seite zeigt den HomeKit-Code – schützen, wenn andere dein Netz nutzen",
-  "ffmpeg (for cameras)": "ffmpeg (für Kameras)"
+  "ffmpeg (for cameras)": "ffmpeg (für Kameras)",
+  "Alexa port": "Alexa-Port",
+  "Echo devices only find the bridge on port 80; change only for tests": "Echo-Geräte finden die Bridge nur auf Port 80; nur zum Testen ändern"
 }

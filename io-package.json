@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "homekit-easy",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "news": {
+      "0.2.0": {
+        "en": "Alexa voice control without cloud: tick \"auch für Alexa\" per device (local Hue bridge emulation for lights, dimmers, switches, outlets, fans, blinds)",
+        "de": "Alexa-Sprachsteuerung ohne Cloud: Haken „auch für Alexa“ pro Gerät (lokale Hue-Bridge für Licht, Dimmer, Schalter, Steckdosen, Ventilatoren, Rollläden)"
+      },
       "0.1.0": {
         "en": "Initial release: ioBroker data points in Apple Home - pick a device type and a data point; lights, dimmers, blinds, garage, locks, thermostats, sensors, alarm, buttons, cameras and doorbell from livecam",
         "de": "Erste Version: ioBroker-Datenpunkte in Apple Home – Geräteart und Datenpunkt wählen; Licht, Dimmer, Rollläden, Garage, Schlösser, Thermostate, Sensoren, Alarmanlage, Taster, Kameras und Türklingel aus livecam"
@@ -57,7 +61,8 @@
     "bridgeName": "ioBroker",
     "publicHost": "",
     "accessKey": "",
-    "ffmpegPath": "ffmpeg"
+    "ffmpegPath": "ffmpeg",
+    "alexaPort": 80
   },
   "protectedNative": [
     "accessKey"

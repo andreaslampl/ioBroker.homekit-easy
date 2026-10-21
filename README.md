@@ -56,6 +56,32 @@ neu hinzufügen.
 Grundsätzlich: Apple Home schreibt **nur** in Datenpunkte, die als „Schalten/Befehl/Position…“
 eingetragen sind. Reine Sensoren sind nur lesbar.
 
+## Alexa (Sprachsteuerung, lokal)
+
+Dieselben Geräte lassen sich auch mit **Alexa** steuern – ohne Skill, ohne Amazon-Konto-Verknüpfung
+und ohne Cloud-Abo. HomeKit Easy meldet sich im Heimnetz wie eine Philips-Hue-Bridge; die Echo-Geräte
+finden sie selbst.
+
+1. Beim Gerät den Haken **„auch für Alexa“** setzen und **Speichern**.
+2. Zum Echo sagen: **„Alexa, suche Geräte“** (oder Alexa-App → Geräte → ＋ → Andere → Geräte suchen).
+3. Fertig: „Alexa, Licht Wohnzimmer ein“, „Alexa, Essen auf 30 Prozent“, „Alexa, Fernsehen aus“.
+   Die Geräte erscheinen in der Alexa-App als **Lampen** (Schalter/Steckdosen als Stecker) und lassen
+   sich Räumen zuordnen und in **Routinen** verwenden.
+
+| Gerätetyp | Alexa |
+| --- | --- |
+| Licht, Dimmer | ein/aus, Helligkeit in Prozent |
+| Schalter, Steckdose | ein/aus (z. B. Szenen) |
+| Ventilator | ein/aus, mit Stufen-Datenpunkt auch Prozent |
+| Rollladen | „ein“ = auf, „aus“ = zu, „auf 30 Prozent“ = 30 % offen |
+
+Heizung, Sensoren, Schlösser, Garagentore und Alarmanlagen gibt es für Alexa **nicht** – Alexa kennt
+bei einer Hue-Bridge nur Lampen, und Türen/Alarm sollen nicht ohne PIN per Zuruf aufgehen.
+
+Voraussetzungen: **Port 80** am ioBroker-Rechner muss frei sein (die Echos suchen nur dort; prüfen mit
+`sudo ss -tlnp | grep ':80 '`), Echo und ioBroker im selben Netz. Die Einrichtungsseite zeigt, ob die
+Alexa-Bridge läuft und wann zuletzt ein Echo nachgefragt hat. Neue Geräte: wieder „Alexa, suche Geräte“.
+
 ## Kameras
 
 Die Kameras kommen aus dem Adapter **livecam** (`livecam.0.cameras.<name>`). HomeKit Easy holt
@@ -84,6 +110,9 @@ geklingelt“ mit Bild am iPhone und an der Apple Watch.
 - Getestet mit einem echten HomeKit-Client (hap-controller) – mit dem iPhone noch nicht.
 
 ## Changelog
+
+### 0.2.0
+- Alexa: Haken „auch für Alexa“ pro Gerät; lokale Hue-Emulation (Licht, Dimmer, Schalter, Steckdose, Ventilator, Rollladen).
 
 ### 0.1.0
 - Erste Version: Einrichtungsseite mit Objekt-Browser, 22 Gerätetypen, Kameras und Türklingel aus livecam.

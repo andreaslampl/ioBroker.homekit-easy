@@ -1,6 +1,6 @@
 {
   "name": "iobroker.homekit-easy",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "HomeKit Easy: ioBroker data points in Apple Home without the complexity - pick a device type and a data point",
   "author": "andreaslampl",
   "license": "MIT",

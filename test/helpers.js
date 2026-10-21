@@ -31,12 +31,13 @@ async function until(fn, ms = 8000) {
 /** HAP UUIDs are written without the base suffix by some clients: compare the short form. */
 const short = u => String(u).split('-')[0].replace(/^0+/, '').toUpperCase();
 
-async function startAdapter(t, config = {}, camBase) {
+async function startAdapter(t, config = {}, camBase, before = () => {}) {
     const port = await freePort();
     const hapPort = await freePort();
     const adapter = require('../main.js')({ config: { port, hapPort, bridgeName: 'Test Haus', publicHost: '127.0.0.1', ...config } });
     adapter.bindAddresses = ['127.0.0.1'];
     demoHouse(adapter, camBase);
+    before(adapter);
     adapter.emit('ready');
     await until(() => adapter.foreign['homekit-easy.0.info.connection'] && adapter.foreign['homekit-easy.0.info.connection'].val === true, 30000);
     t.after(() => new Promise(resolve => adapter.emit('unload', resolve)));

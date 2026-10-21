@@ -16,16 +16,19 @@
   <button id="save" type="button" class="primary" disabled>Speichern</button>
 </header>
 <main>
-  <section id="pairing" class="card"></section>
+  <div class="side">
+    <section id="pairing" class="card"></section>
+    <section id="alexa" class="card"></section>
+  </div>
   <section class="card devices">
     <div class="head">
-      <h2>Geräte in Apple Home</h2>
+      <h2>Geräte</h2>
       <span id="count" class="muted"></span>
       <span class="grow"></span>
       <button id="add" type="button" class="primary">＋ Gerät</button>
     </div>
     <div id="list"></div>
-    <p class="hint">Räume und die Reihenfolge stellst du in der Home-App ein. Nach „Speichern“ erscheinen neue Geräte in Apple Home – ohne neu zu koppeln.</p>
+    <p class="hint">Räume und die Reihenfolge stellst du in der Home-App ein. Nach „Speichern“ erscheinen neue Geräte in Apple Home – ohne neu zu koppeln. Für Alexa danach „Alexa, suche Geräte“ sagen.</p>
   </section>
 </main>
 <div id="toast"></div>

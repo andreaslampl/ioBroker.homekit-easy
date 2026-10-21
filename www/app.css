@@ -31,6 +31,12 @@ body { overflow-x: hidden; }
 .card { background: var(--card); border-radius: 16px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .card h2 { font-size: 17px; margin: 0; }
 #pairing { text-align: center; }
+.side { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+#alexa h2 { margin-bottom: 8px; }
+#alexa p, #alexa ol { font-size: 14px; line-height: 1.5; }
+#alexa ol { padding-left: 20px; }
+.tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #31c4f3; color: #fff; font-weight: 600; flex: none; }
+.ok { color: var(--ok); } .bad { color: var(--bad); }
 #pairing .qr { background: #fff; border-radius: 12px; padding: 10px; width: 220px; margin: 12px auto; }
 #pairing .qr svg { width: 100%; height: auto; display: block; }
 #pairing .pin { font-family: ui-monospace, Menlo, monospace; font-size: 28px; letter-spacing: 2px; font-weight: 600; }
