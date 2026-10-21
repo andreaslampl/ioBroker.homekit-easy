@@ -40,6 +40,7 @@ neu hinzufügen.
 | --- | --- | --- |
 | Licht (Ein/Aus), Steckdose, Schalter | Schalten, Status (optional) | invertiert |
 | Dimmer | Helligkeit 0–100, Schalten (optional), Status | |
+| Farblicht (RGBW) | Rot, Grün, Blau, Weiß (optional), Helligkeit (optional, Shelly `gain`), Ein/Aus (optional) | Wertebereich 0–255 oder 0–100 % |
 | Ventilator / Lüftung | Ein/Aus, Stufe 0–100 (optional), Status | |
 | Rollladen / Jalousie / Markise | Position, Stopp (optional), Position-Status | 100 = zu |
 | Garagentor / Tor | Befehl, Status offen/zu | Impuls oder Auf/Zu, Status invertiert |
@@ -56,6 +57,21 @@ neu hinzufügen.
 Grundsätzlich: Apple Home schreibt **nur** in Datenpunkte, die als „Schalten/Befehl/Position…“
 eingetragen sind. Reine Sensoren sind nur lesbar.
 
+## Farblicht (RGBW) – KNX und Shelly
+
+Typ **„Farblicht (RGBW)“**: in Apple Home mit Farbrad und Weißtönen, bei Alexa „Alexa, Wohnzimmer
+rot“, „… warmweiß“, „… auf 40 Prozent“.
+
+| | KNX (z. B. RGBW-Aktor) | Shelly RGBW2 / Bulb |
+| --- | --- | --- |
+| Rot, Grün, Blau, Weiß | die 4 Kanal-Objekte | `color.red/green/blue/white` |
+| Helligkeit | leer lassen (die Kanäle werden skaliert) | `color.gain` |
+| Ein/Aus | Schalt-Objekt (optional) | `color.Switch` |
+| Wertebereich | 0–100 % (DPT 5.001) oder 0–255 (DPT 5.010) | 0–255 |
+
+Der Weißanteil einer Farbe geht auf den W-Kanal (reines Weiß = nur W), Weißtöne kommen vom W-Kanal
+mit etwas Rot bzw. Blau. Ist die Leuchte aus, wird zuerst eingeschaltet und dann die Farbe gesendet.
+
 ## Alexa (Sprachsteuerung, lokal)
 
 Dieselben Geräte lassen sich auch mit **Alexa** steuern – ohne Skill, ohne Amazon-Konto-Verknüpfung
@@ -71,6 +87,7 @@ finden sie selbst.
 | Gerätetyp | Alexa |
 | --- | --- |
 | Licht, Dimmer | ein/aus, Helligkeit in Prozent |
+| Farblicht (RGBW) | ein/aus, Prozent, Farben, Weißtöne |
 | Schalter, Steckdose | ein/aus (z. B. Szenen) |
 | Ventilator | ein/aus, mit Stufen-Datenpunkt auch Prozent |
 | Rollladen | „ein“ = auf, „aus“ = zu, „auf 30 Prozent“ = 30 % offen |
@@ -110,6 +127,9 @@ geklingelt“ mit Bild am iPhone und an der Apple Watch.
 - Getestet mit einem echten HomeKit-Client (hap-controller) – mit dem iPhone noch nicht.
 
 ## Changelog
+
+### 0.3.0
+- Neuer Typ „Farblicht (RGBW)“ für KNX und Shelly: Apple Home (Farbrad, Weißtöne) und Alexa (Farben, warmweiß).
 
 ### 0.2.1
 - Dimmer mit eigenem Ein/Aus-Datenpunkt (KNX): erst Ein, dann die Helligkeit; Ein/Aus richtet sich nach dem zuletzt geänderten Datenpunkt (Alexa und Apple Home).

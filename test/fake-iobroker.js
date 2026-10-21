@@ -100,6 +100,15 @@ function install() {
 /** Data points of a small house: KNX, Shelly, sensors, alarm, livecam. */
 function demoHouse(a, camBase = 'http://127.0.0.1:1') {
     a.add('knx.0.Licht.Wohnzimmer', { name: 'Licht Wohnzimmer', type: 'boolean', role: 'switch', write: true }, false);
+    for (const c of ['R', 'G', 'B', 'W']) {
+        a.add(`knx.0.RGBW.Wohnzimmer_${c}`, { name: `RGBW ${c}`, type: 'number', role: 'level.color', unit: '%', min: 0, max: 100, write: true }, 0);
+    }
+    a.add('knx.0.RGBW.Wohnzimmer_Schalten', { name: 'RGBW Ein/Aus', type: 'boolean', role: 'switch', write: true }, false);
+    for (const c of ['red', 'green', 'blue', 'white']) {
+        a.add(`shelly.0.SHRGBW2#1#1.color.${c}`, { name: c, type: 'number', role: 'level.color', min: 0, max: 255, write: true }, 0);
+    }
+    a.add('shelly.0.SHRGBW2#1#1.color.gain', { name: 'gain', type: 'number', role: 'level.brightness', min: 0, max: 100, write: true }, 0);
+    a.add('shelly.0.SHRGBW2#1#1.color.Switch', { name: 'Switch', type: 'boolean', role: 'switch', write: true }, false);
     a.add('knx.0.Licht.Essen', { name: 'Dimmer Essen', type: 'number', role: 'level.dimmer', unit: '%', min: 0, max: 100, write: true }, 40);
     a.add('knx.0.Rollladen.Wohnzimmer', { name: 'Rollladen', type: 'number', role: 'level.blind', unit: '%', write: true }, 100);
     a.add('knx.0.Rollladen.Stop', { name: 'Stopp', type: 'boolean', role: 'button', write: true }, false);

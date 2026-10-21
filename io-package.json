@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "homekit-easy",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "news": {
+      "0.3.0": {
+        "en": "New type color light (RGBW) for KNX and Shelly: Apple Home color wheel and white tones, Alexa colors",
+        "de": "Neuer Typ Farblicht (RGBW) für KNX und Shelly: Apple Home mit Farbrad und Weißtönen, Alexa mit Farben"
+      },
       "0.2.1": {
         "en": "Dimmer with its own on/off data point (KNX): switch on first, then the brightness; on/off follows the data point changed last (Alexa and Apple Home)",
         "de": "Dimmer mit eigenem Ein/Aus-Datenpunkt (KNX): erst Ein, dann die Helligkeit; Ein/Aus richtet sich nach dem zuletzt geänderten Datenpunkt (Alexa und Apple Home)"

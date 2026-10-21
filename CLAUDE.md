@@ -21,6 +21,12 @@ just a type + data points picked in an object browser. Setup page on its own por
   Apple Home may only write those (checked in `main.write`). The PIN is never logged.
 - `lib/server.js` – setup page + API (catalog, devices, objects/values for the picker, cameras,
   pairing with QR SVG, reset); optional access key (`?key=` once -> cookie `hke_key`).
+- `lib/color.js` – `colorLight(d, x)` (0.3.0): RGBW on separate channel data points (KNX 0-100 or
+  0-255, Shelly 0-255 + gain + Switch). hue/sat/ct/bri <-> channels (white part of a color -> W;
+  white temperature = W full + half-strength tint), brightness data point keeps channels full scale,
+  writes debounced 60 ms (Home sends hue and saturation separately), switch first then color 400 ms
+  later, commanded state shown for 10 s; on/off by the newest data point (`x.ts` = lc).
+  Used by the HomeKit type `rgbw` and Alexa (Hue "Extended color light": hue/sat/xy/ct).
 - `lib/hue.js` – Alexa without cloud (0.2.0): emulated Hue bridge API v1 (SSDP on UDP 1900 + HTTP on
   port 80 - Echo devices insist on 80; description.xml "Philips hue bridge 2012", POST /api user,
   lights/state PUT {on, bri}); commanded state is reported back for 8 s so Alexa does not say the
@@ -43,7 +49,10 @@ just a type + data points picked in an object browser. Setup page on its own por
   extra on/off data point Alexa got confused -> 0.2.1: brightness was written before "Ein" (a KNX dimmer
   then jumps to its switch-on value) and the stale switch object decided on/off. Now switch first,
   brightness 400 ms later, and on/off = whichever of the two data points changed last (`dimmerOn`,
-  `x.ts`); same for the HomeKit dimmer.
+  `x.ts`); same for the HomeKit dimmer. `x.ts` returns lc (last change), so devices that repeat their
+  values (Shelly polling) do not count as a change.
+- 0.3.0: owner asked for RGBW (KNX and Shelly) -> type "Farblicht (RGBW)" (lib/color.js). Not yet
+  tested with the owner's actuators.
 
 ## Conventions
 

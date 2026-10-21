@@ -71,9 +71,10 @@ class HomekitEasy extends utils.Adapter {
                 const v = st ? (typeof st.val === 'boolean' ? Number(st.val) : Number(st.val)) : NaN;
                 return Number.isFinite(v) && st.val !== null && st.val !== '' ? v : def;
             },
+            // when the value last changed (a device that repeats its values does not count)
             ts: id => {
                 const st = id && this.values.get(id);
-                return st ? st.ts || 0 : 0;
+                return st ? st.lc || st.ts || 0 : 0;
             },
             meta: id => this.meta.get(id) || {},
             set: (id, val) => this.write(id, val).catch(err => this.log.warn(`HomeKit -> ${id}: ${err.message}`)),
@@ -257,7 +258,7 @@ class HomekitEasy extends utils.Adapter {
             }
             const st = await this.getForeignStateAsync(id).catch(() => null);
             if (st) {
-                this.values.set(id, { val: st.val, ack: st.ack, ts: st.ts });
+                this.values.set(id, { val: st.val, ack: st.ack, ts: st.ts, lc: st.lc || st.ts });
             }
             this.bridge.notify(id);
         }
@@ -268,7 +269,7 @@ class HomekitEasy extends utils.Adapter {
             return;
         }
         if (state) {
-            this.values.set(id, { val: state.val, ack: state.ack, ts: state.ts });
+            this.values.set(id, { val: state.val, ack: state.ack, ts: state.ts, lc: state.lc || state.ts });
         } else {
             this.values.delete(id);
         }
@@ -291,7 +292,8 @@ class HomekitEasy extends utils.Adapter {
         }
         this.log.debug(`HomeKit -> ${id} = ${v}`);
         // show it at once; the device's confirmation replaces it
-        this.values.set(id, { val: v, ack: false, ts: Date.now() });
+        const prev = this.values.get(id);
+        this.values.set(id, { val: v, ack: false, ts: Date.now(), lc: prev && prev.val === v ? prev.lc : Date.now() });
         await this.setForeignStateAsync(id, v, false);
     }
 
