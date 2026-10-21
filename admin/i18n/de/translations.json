@@ -1,0 +1,11 @@
+{
+  "Devices are set up on the setup page (instance link, globe icon). There you also find the QR code for Apple Home.": "Die Geräte werden auf der Einrichtungsseite eingetragen (Link der Instanz, Weltkugel). Dort ist auch der QR-Code für Apple Home.",
+  "Name of the bridge in Apple Home": "Name der Bridge in Apple Home",
+  "Port of the setup page": "Port der Einrichtungsseite",
+  "HomeKit port": "HomeKit-Port",
+  "Must be free; change only if another HomeKit bridge (e.g. Homebridge, yahka) uses it": "Muss frei sein; nur ändern, wenn eine andere HomeKit-Bridge (z. B. Homebridge, yahka) ihn verwendet",
+  "Address of the ioBroker server for the link (optional)": "Adresse des ioBroker-Servers für den Link (optional)",
+  "Access key for the setup page (optional)": "Zugriffsschlüssel für die Einrichtungsseite (optional)",
+  "The page shows the HomeKit code - protect it if others use your network": "Die Seite zeigt den HomeKit-Code – schützen, wenn andere dein Netz nutzen",
+  "ffmpeg (for cameras)": "ffmpeg (für Kameras)"
+}

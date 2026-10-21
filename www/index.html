@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HomeKit Easy</title>
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header id="top">
+  <img src="icon.png" alt="" class="logo">
+  <h1>HomeKit Easy</h1>
+  <span id="pairState" class="badge"></span>
+  <span class="grow"></span>
+  <button id="save" type="button" class="primary" disabled>Speichern</button>
+</header>
+<main>
+  <section id="pairing" class="card"></section>
+  <section class="card devices">
+    <div class="head">
+      <h2>Geräte in Apple Home</h2>
+      <span id="count" class="muted"></span>
+      <span class="grow"></span>
+      <button id="add" type="button" class="primary">＋ Gerät</button>
+    </div>
+    <div id="list"></div>
+    <p class="hint">Räume und die Reihenfolge stellst du in der Home-App ein. Nach „Speichern“ erscheinen neue Geräte in Apple Home – ohne neu zu koppeln.</p>
+  </section>
+</main>
+<div id="toast"></div>
+<script src="picker.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

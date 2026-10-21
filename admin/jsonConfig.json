@@ -1,0 +1,58 @@
+{
+  "i18n": true,
+  "type": "panel",
+  "items": {
+    "help": {
+      "type": "staticText",
+      "text": "Devices are set up on the setup page (instance link, globe icon). There you also find the QR code for Apple Home.",
+      "xs": 12
+    },
+    "bridgeName": {
+      "type": "text",
+      "label": "Name of the bridge in Apple Home",
+      "default": "ioBroker",
+      "newLine": true,
+      "xs": 12,
+      "sm": 4
+    },
+    "port": {
+      "type": "port",
+      "label": "Port of the setup page",
+      "default": 8100,
+      "newLine": true,
+      "xs": 12,
+      "sm": 3
+    },
+    "hapPort": {
+      "type": "port",
+      "label": "HomeKit port",
+      "default": 51828,
+      "help": "Must be free; change only if another HomeKit bridge (e.g. Homebridge, yahka) uses it",
+      "xs": 12,
+      "sm": 3
+    },
+    "publicHost": {
+      "type": "text",
+      "label": "Address of the ioBroker server for the link (optional)",
+      "newLine": true,
+      "xs": 12,
+      "sm": 5
+    },
+    "accessKey": {
+      "type": "password",
+      "label": "Access key for the setup page (optional)",
+      "help": "The page shows the HomeKit code - protect it if others use your network",
+      "newLine": true,
+      "xs": 12,
+      "sm": 5
+    },
+    "ffmpegPath": {
+      "type": "text",
+      "label": "ffmpeg (for cameras)",
+      "default": "ffmpeg",
+      "newLine": true,
+      "xs": 12,
+      "sm": 4
+    }
+  }
+}

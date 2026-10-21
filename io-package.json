@@ -1,0 +1,139 @@
+{
+  "common": {
+    "name": "homekit-easy",
+    "version": "0.1.0",
+    "news": {
+      "0.1.0": {
+        "en": "Initial release: ioBroker data points in Apple Home - pick a device type and a data point; lights, dimmers, blinds, garage, locks, thermostats, sensors, alarm, buttons, cameras and doorbell from livecam",
+        "de": "Erste Version: ioBroker-Datenpunkte in Apple Home – Geräteart und Datenpunkt wählen; Licht, Dimmer, Rollläden, Garage, Schlösser, Thermostate, Sensoren, Alarmanlage, Taster, Kameras und Türklingel aus livecam"
+      }
+    },
+    "titleLang": {
+      "en": "HomeKit Easy",
+      "de": "HomeKit Easy"
+    },
+    "desc": {
+      "en": "Apple HomeKit bridge without the complexity: choose a device type and a data point, pair with the QR code. Cameras and doorbell from the livecam adapter.",
+      "de": "Apple-HomeKit-Bridge ohne Kompliziertes: Geräteart und Datenpunkt wählen, mit dem QR-Code koppeln. Kameras und Türklingel aus dem livecam-Adapter."
+    },
+    "authors": [
+      "andreaslampl"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "mode": "daemon",
+    "icon": "homekit-easy.png",
+    "extIcon": "https://raw.githubusercontent.com/andreaslampl/ioBroker.homekit-easy/main/admin/homekit-easy.png",
+    "readme": "https://github.com/andreaslampl/ioBroker.homekit-easy/blob/main/README.md",
+    "enabled": true,
+    "type": "iot-systems",
+    "compact": false,
+    "connectionType": "local",
+    "dataSource": "push",
+    "adminUI": {
+      "config": "json"
+    },
+    "localLinks": {
+      "_default": {
+        "link": "http://%ip%:%port%/",
+        "pro": false
+      }
+    },
+    "tier": 2,
+    "dependencies": [
+      {
+        "js-controller": ">=5.0.19"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=6.0.0"
+      }
+    ]
+  },
+  "native": {
+    "port": 8100,
+    "hapPort": 51828,
+    "bridgeName": "ioBroker",
+    "publicHost": "",
+    "accessKey": "",
+    "ffmpegPath": "ffmpeg"
+  },
+  "protectedNative": [
+    "accessKey"
+  ],
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "Bridge running",
+          "de": "Bridge läuft"
+        },
+        "type": "boolean",
+        "role": "indicator.connected",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.paired",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "Paired with Apple Home",
+          "de": "Mit Apple Home gekoppelt"
+        },
+        "type": "boolean",
+        "role": "indicator",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.devices",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "Devices in HomeKit",
+          "de": "Geräte in HomeKit"
+        },
+        "type": "number",
+        "role": "value",
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.setupUrl",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "Setup page",
+          "de": "Einrichtungsseite"
+        },
+        "type": "string",
+        "role": "url",
+        "read": true,
+        "write": false
+      },
+      "native": {}
+    }
+  ]
+}

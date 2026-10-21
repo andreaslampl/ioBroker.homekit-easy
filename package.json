@@ -1,0 +1,47 @@
+{
+  "name": "iobroker.homekit-easy",
+  "version": "0.1.0",
+  "description": "HomeKit Easy: ioBroker data points in Apple Home without the complexity - pick a device type and a data point",
+  "author": "andreaslampl",
+  "license": "MIT",
+  "homepage": "https://github.com/andreaslampl/ioBroker.homekit-easy",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andreaslampl/ioBroker.homekit-easy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/andreaslampl/ioBroker.homekit-easy/issues"
+  },
+  "keywords": [
+    "ioBroker",
+    "HomeKit",
+    "Apple Home",
+    "Siri",
+    "HAP"
+  ],
+  "main": "main.js",
+  "files": [
+    "admin/",
+    "lib/",
+    "www/",
+    "main.js",
+    "io-package.json",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@iobroker/adapter-core": "^3.4.3",
+    "hap-nodejs": "0.14.3",
+    "qrcode": "^1.5.4",
+    "ws": "^8.22.0"
+  },
+  "scripts": {
+    "test": "node --test --test-timeout=120000 test/*.test.js"
+  },
+  "devDependencies": {
+    "hap-controller": "^0.10.2"
+  }
+}

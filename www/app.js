@@ -1,0 +1,365 @@
+'use strict';
+
+/* Setup page: pairing (QR code, PIN) and the device list with the object browser. */
+
+const $ = id => document.getElementById(id);
+let catalog = [];
+let devices = [];
+let saved = '[]';
+let cameras = null;
+const ICONS = { 'Licht & Strom': '💡', 'Fenster & Türen': '🚪', Klima: '🌡️', Sensoren: '📡', Sicherheit: '🛡️', Kameras: '📷', Sonstiges: '🔘' };
+
+function esc(s) {
+  return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+async function api(path, options = {}) {
+  const res = await fetch('api/' + path, { headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', ...options });
+  const text = await res.text();
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch (e) {
+    data = text;
+  }
+  if (!res.ok) throw new Error((data && data.error) || text || 'HTTP ' + res.status);
+  return data;
+}
+
+function toast(text, error) {
+  const t = $('toast');
+  t.textContent = text;
+  t.className = error ? 'error' : '';
+  t.style.display = text ? 'block' : 'none';
+  clearTimeout(toast.timer);
+  if (text) toast.timer = setTimeout(() => toast(''), error ? 6000 : 2500);
+}
+
+function typeOf(d) {
+  return catalog.find(c => c.type === d.type);
+}
+
+function dirty() {
+  const changed = JSON.stringify(devices) !== saved;
+  $('save').disabled = !changed;
+  return changed;
+}
+
+// ---------------- pairing ----------------
+
+async function loadPairing() {
+  const p = await api('pairing');
+  const box = $('pairing');
+  $('pairState').textContent = p.paired ? 'Gekoppelt' : 'Nicht gekoppelt';
+  $('pairState').className = 'badge' + (p.paired ? ' ok' : '');
+  box.innerHTML = p.paired
+    ? '<h2>Mit Apple Home gekoppelt</h2><div class="paired">✅</div><p class="muted">Bridge „' + esc(p.name) + '“ mit ' + p.devices + ' Gerät(en). Neue Geräte erscheinen nach dem Speichern automatisch in der Home-App.</p>' +
+      '<p class="muted">Code: <b>' + esc(p.pincode) + '</b></p><button type="button" class="danger" id="reset">Kopplung zurücksetzen …</button>'
+    : '<h2>Mit Apple Home koppeln</h2><div class="qr">' + p.qr + '</div><div class="pin">' + esc(p.pincode) + '</div>' +
+      '<ol><li>iPhone: <b>Home-App</b> öffnen → <b>＋</b> → <b>Gerät hinzufügen</b>.</li><li>Den <b>QR-Code</b> scannen – oder „Weitere Optionen“ → „ioBroker“ wählen und den <b>Code</b> eingeben.</li>' +
+      '<li>„Nicht zertifiziertes Gerät“ mit <b>Trotzdem hinzufügen</b> bestätigen.</li><li>Räume für die Geräte wählen – fertig.</li></ol>' +
+      '<p class="muted" style="font-size:13px">Das iPhone muss im selben Netz sein wie der ioBroker.</p><button type="button" class="danger" id="reset">Neuen Code erzeugen …</button>';
+  $('reset').onclick = async () => {
+    if (!confirm('Kopplung wirklich zurücksetzen? Die Bridge muss danach in der Home-App neu hinzugefügt werden (vorher dort entfernen).')) return;
+    await api('pairing/reset', { method: 'POST' });
+    toast('Kopplung zurückgesetzt – neuer Code');
+    loadPairing();
+  };
+}
+
+// ---------------- device list ----------------
+
+function mainState(d) {
+  const t = typeOf(d);
+  if (!t) return '';
+  const f = t.fields.find(x => d[x[0]]);
+  return f ? d[f[0]] : '';
+}
+
+function missing(d) {
+  const t = typeOf(d);
+  return t ? t.fields.filter(f => f[3] && !d[f[0]]).map(f => f[1]) : [];
+}
+
+function renderList() {
+  const list = $('list');
+  list.textContent = '';
+  $('count').textContent = devices.length ? devices.length + ' Gerät(e)' : '';
+  if (!devices.length) {
+    list.innerHTML = '<div class="empty">Noch keine Geräte. Mit „＋ Gerät“ das erste anlegen, z. B. ein Licht.</div>';
+    return;
+  }
+  const groups = {};
+  for (const d of devices) {
+    const t = typeOf(d);
+    const g = t ? t.group : 'Sonstiges';
+    (groups[g] = groups[g] || []).push(d);
+  }
+  for (const g of Object.keys(ICONS).filter(k => groups[k])) {
+    const h = document.createElement('div');
+    h.className = 'group';
+    h.textContent = g;
+    list.appendChild(h);
+    for (const d of groups[g]) {
+      const t = typeOf(d);
+      const row = document.createElement('div');
+      row.className = 'dev' + (d.enabled === false ? ' off' : '');
+      const miss = missing(d);
+      row.innerHTML = '<span class="ico">' + (ICONS[g] || '🔘') + '</span><div class="txt"><div class="name">' + esc(d.name) + '</div><div class="sub">' +
+        esc(t ? t.label : d.type) + ' · ' + esc(mainState(d)) + '</div>' + (miss.length ? '<div class="warn">fehlt: ' + esc(miss.join(', ')) + '</div>' : '') + '</div>' +
+        (d.enabled === false ? '<span class="muted">aus</span>' : '');
+      row.onclick = () => edit(d);
+      list.appendChild(row);
+    }
+  }
+}
+
+// ---------------- edit dialog ----------------
+
+function field(box, label, input, help) {
+  const l = document.createElement('label');
+  l.textContent = label;
+  box.appendChild(l);
+  box.appendChild(input);
+  if (help) {
+    const h = document.createElement('div');
+    h.className = 'help';
+    h.textContent = help;
+    box.appendChild(h);
+  }
+  return input;
+}
+
+function textInput(value, type = 'text') {
+  const i = document.createElement('input');
+  i.type = type;
+  if (type === 'number') i.step = 'any';
+  i.value = value === undefined || value === null ? '' : value;
+  return i;
+}
+
+async function showValue(id, el, name) {
+  el.textContent = '';
+  if (!id) return;
+  try {
+    const v = (await api('values', { method: 'POST', body: JSON.stringify([id]) }))[id];
+    el.textContent = (name ? name + ' · ' : '') + (v === null || v === undefined ? '⚠ kein Wert – ID prüfen' : 'aktuell: ' + (typeof v === 'object' ? JSON.stringify(v) : String(v)));
+  } catch (e) {
+    // ignore
+  }
+}
+
+function stateField(box, label, value, forOutput) {
+  const row = document.createElement('div');
+  row.className = 'staterow';
+  const input = textInput(value);
+  input.placeholder = 'z. B. knx.0.EG.Licht.Wohnzimmer';
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = '📂 Auswählen';
+  row.append(input, btn);
+  field(box, label, row);
+  const info = document.createElement('div');
+  info.className = 'statename';
+  box.appendChild(info);
+  showValue(value, info);
+  input.onchange = () => showValue(input.value.trim(), info);
+  btn.onclick = async () => {
+    const r = await Picker.open({ api, title: label, current: input.value.trim(), forOutput });
+    if (r) {
+      input.value = r.id;
+      showValue(r.id, info, r.name);
+    }
+  };
+  return input;
+}
+
+async function cameraField(box, label, value) {
+  const s = document.createElement('select');
+  s.innerHTML = '<option value="">(Kamera wählen)</option>';
+  field(box, label, s, 'Die Kameras kommen aus dem livecam-Adapter.');
+  try {
+    cameras = cameras || (await api('cameras'));
+  } catch (e) {
+    cameras = [];
+  }
+  for (const c of cameras) {
+    const o = document.createElement('option');
+    o.value = c.id;
+    o.textContent = c.name + ' (' + c.id + ')';
+    s.appendChild(o);
+  }
+  s.value = value || '';
+  return s;
+}
+
+function edit(original, isNew) {
+  const d = JSON.parse(JSON.stringify(original));
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  const sh = document.createElement('div');
+  sh.className = 'sheet form';
+  ov.appendChild(sh);
+  document.body.appendChild(ov);
+  const close = () => ov.remove();
+  const inputs = {};
+
+  function build() {
+    sh.innerHTML = '<h3><span class="grow">' + (isNew ? 'Gerät hinzufügen' : 'Gerät bearbeiten') + '</span><button type="button" data-x>✕</button></h3>';
+    sh.querySelector('[data-x]').onclick = close;
+    for (const k of Object.keys(inputs)) delete inputs[k];
+    const sel = document.createElement('select');
+    for (const g of Object.keys(ICONS)) {
+      const og = document.createElement('optgroup');
+      og.label = g;
+      for (const c of catalog.filter(x => x.group === g)) {
+        const o = document.createElement('option');
+        o.value = c.type;
+        o.textContent = c.label;
+        og.appendChild(o);
+      }
+      if (og.children.length) sel.appendChild(og);
+    }
+    sel.value = d.type;
+    field(sh, 'Art', sel);
+    sel.onchange = () => {
+      collect();
+      d.type = sel.value;
+      build();
+    };
+    inputs.name = field(sh, 'Name in Apple Home', textInput(d.name), 'Siri versteht diesen Namen, z. B. „Licht Wohnzimmer“.');
+    const t = typeOf(d);
+    for (const [key, label, mode] of t.fields) {
+      if (mode === 'camera') cameraField(sh, label, d[key]).then(s => (inputs[key] = s));
+      else inputs[key] = stateField(sh, label, d[key], mode === 'w');
+    }
+    for (const [key, label, kind, def] of t.options) {
+      const value = d[key] === undefined ? def : d[key];
+      if (kind === 'check') {
+        const l = document.createElement('label');
+        l.className = 'check';
+        const i = document.createElement('input');
+        i.type = 'checkbox';
+        i.checked = Boolean(value);
+        l.append(i, document.createTextNode(label));
+        sh.appendChild(l);
+        inputs[key] = i;
+      } else if (kind.startsWith('select:')) {
+        const s = document.createElement('select');
+        for (const opt of kind.slice(7).split(';')) {
+          const [v, txt] = opt.split('=');
+          const o = document.createElement('option');
+          o.value = v;
+          o.textContent = txt;
+          s.appendChild(o);
+        }
+        s.value = value || s.options[0].value;
+        inputs[key] = field(sh, label, s);
+      } else {
+        inputs[key] = field(sh, label, textInput(value, kind === 'number' ? 'number' : 'text'));
+      }
+    }
+    const en = document.createElement('label');
+    en.className = 'check';
+    const ei = document.createElement('input');
+    ei.type = 'checkbox';
+    ei.checked = d.enabled !== false;
+    en.append(ei, document.createTextNode('in Apple Home anzeigen'));
+    sh.appendChild(en);
+    inputs.enabled = ei;
+
+    const buttons = document.createElement('div');
+    buttons.className = 'buttons';
+    if (!isNew) {
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'danger';
+      del.textContent = 'Löschen';
+      del.onclick = () => {
+        if (!confirm('„' + d.name + '“ löschen? Es verschwindet nach dem Speichern aus Apple Home.')) return;
+        devices = devices.filter(x => x.id !== original.id);
+        close();
+        renderList();
+        dirty();
+      };
+      buttons.appendChild(del);
+    }
+    const grow = document.createElement('span');
+    grow.className = 'grow';
+    const cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.textContent = 'Abbrechen';
+    cancel.onclick = close;
+    const ok = document.createElement('button');
+    ok.type = 'button';
+    ok.className = 'primary';
+    ok.textContent = 'Übernehmen';
+    ok.onclick = () => {
+      collect();
+      const miss = missing(d);
+      if (miss.length) return toast('Bitte noch ausfüllen: ' + miss.join(', '), true);
+      const i = devices.findIndex(x => x.id === original.id);
+      if (i >= 0) devices[i] = d;
+      else devices.push(d);
+      close();
+      renderList();
+      dirty();
+    };
+    buttons.append(grow, cancel, ok);
+    sh.appendChild(buttons);
+  }
+
+  function collect() {
+    const t = typeOf(d);
+    const keep = new Set(['id', 'type', 'name', 'enabled', ...t.fields.map(f => f[0]), ...t.options.map(o => o[0])]);
+    for (const k of Object.keys(d)) if (!keep.has(k)) delete d[k];
+    for (const [key, input] of Object.entries(inputs)) {
+      if (input.type === 'checkbox') d[key] = input.checked;
+      else if (input.type === 'number') d[key] = input.value === '' ? undefined : Number(input.value);
+      else d[key] = input.value.trim();
+      if (d[key] === '' || d[key] === undefined) delete d[key];
+    }
+    d.name = d.name || t.label;
+  }
+  build();
+}
+
+function newId() {
+  let i = 1;
+  while (devices.some(d => d.id === 'd' + i)) i++;
+  return 'd' + i;
+}
+
+async function save() {
+  try {
+    devices = await api('devices', { method: 'PUT', body: JSON.stringify(devices) });
+    saved = JSON.stringify(devices);
+    dirty();
+    renderList();
+    loadPairing();
+    toast('Gespeichert – Apple Home ist aktualisiert');
+  } catch (e) {
+    toast('Speichern fehlgeschlagen: ' + e.message, true);
+  }
+}
+
+(async () => {
+  $('save').onclick = save;
+  $('add').onclick = () => edit({ id: newId(), type: 'light', name: '', enabled: true }, true);
+  window.addEventListener('beforeunload', e => {
+    if (dirty()) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+  try {
+    catalog = await api('catalog');
+    devices = await api('devices');
+    saved = JSON.stringify(devices);
+    renderList();
+    await loadPairing();
+    setInterval(() => !document.hidden && loadPairing().catch(() => {}), 10000);
+  } catch (e) {
+    toast('Verbindung zum Adapter fehlgeschlagen: ' + e.message, true);
+  }
+})();
