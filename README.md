@@ -111,6 +111,9 @@ geklingelt“ mit Bild am iPhone und an der Apple Watch.
 
 ## Changelog
 
+### 0.2.1
+- Dimmer mit eigenem Ein/Aus-Datenpunkt (KNX): erst Ein, dann die Helligkeit; Ein/Aus richtet sich nach dem zuletzt geänderten Datenpunkt (Alexa und Apple Home).
+
 ### 0.2.0
 - Alexa: Haken „auch für Alexa“ pro Gerät; lokale Hue-Emulation (Licht, Dimmer, Schalter, Steckdose, Ventilator, Rollladen).
 

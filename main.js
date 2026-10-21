@@ -71,6 +71,10 @@ class HomekitEasy extends utils.Adapter {
                 const v = st ? (typeof st.val === 'boolean' ? Number(st.val) : Number(st.val)) : NaN;
                 return Number.isFinite(v) && st.val !== null && st.val !== '' ? v : def;
             },
+            ts: id => {
+                const st = id && this.values.get(id);
+                return st ? st.ts || 0 : 0;
+            },
             meta: id => this.meta.get(id) || {},
             set: (id, val) => this.write(id, val).catch(err => this.log.warn(`HomeKit -> ${id}: ${err.message}`)),
         };

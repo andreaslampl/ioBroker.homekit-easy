@@ -78,6 +78,36 @@ test('Alexa: discovery, lights for the ticked devices, on/off and percent like a
     await put(rolloId, { on: true });
     await until(() => adapter.foreign['knx.0.Rollladen.Wohnzimmer'].val === 0);
 
+    // dimmer with its own on/off data point (KNX): switch first, then the percent; state = newest
+    adapter.add('knx.0.Licht.Bad', { name: 'Bad Helligkeit', type: 'number', role: 'level.dimmer', write: true }, 0);
+    adapter.add('knx.0.Licht.Bad_Schalten', { name: 'Bad Ein/Aus', type: 'boolean', role: 'switch', write: true }, false);
+    const withBad = [...saved, { id: 'bad', type: 'dimmer', name: 'Bad', state: 'knx.0.Licht.Bad', switchState: 'knx.0.Licht.Bad_Schalten', alexa: true }];
+    await api('devices', { method: 'PUT', body: JSON.stringify(withBad) });
+    const bad = Object.entries(await (await fetch(`${base}/api/${user}/lights`)).json()).find(([, l]) => l.name === 'Bad')[0];
+    adapter.writes.length = 0;
+    await put(bad, { on: true, bri: Math.round(0.3 * 254) });
+    await until(() => adapter.foreign['knx.0.Licht.Bad'].val === 30);
+    const order = adapter.writes.filter(w => w[0].startsWith('knx.0.Licht.Bad')).map(w => `${w[0].split('.').pop()}=${w[1]}`);
+    assert.deepEqual(order, ['Bad_Schalten=true', 'Bad=30'], 'switch before brightness');
+    await new Promise(r => setTimeout(r, 9000)); // past the time Alexa's own command is echoed
+    let l = (await (await fetch(`${base}/api/${user}/lights/${bad}`)).json()).state;
+    assert.equal(l.on, true);
+    assert.equal(l.bri, Math.round(0.3 * 254));
+    // "Alexa, Bad aus": switch only; the old brightness value must not make it look on
+    await put(bad, { on: false });
+    await until(() => adapter.foreign['knx.0.Licht.Bad_Schalten'].val === false);
+    await new Promise(r => setTimeout(r, 9000));
+    l = (await (await fetch(`${base}/api/${user}/lights/${bad}`)).json()).state;
+    assert.equal(l.on, false);
+    // already on: "auf 60 Prozent" only sends the brightness
+    await put(bad, { on: true });
+    await until(() => adapter.foreign['knx.0.Licht.Bad_Schalten'].val === true);
+    adapter.writes.length = 0;
+    await put(bad, { on: true, bri: Math.round(0.6 * 254) });
+    await until(() => adapter.foreign['knx.0.Licht.Bad'].val === 60);
+    assert.ok(!adapter.writes.some(w => w[0] === 'knx.0.Licht.Bad_Schalten'));
+    await api('devices', { method: 'PUT', body: JSON.stringify(saved) });
+
     // ids stay the same after another save (Alexa remembers them)
     await api('devices', { method: 'PUT', body: JSON.stringify(saved.filter(d => d.id !== 'licht')) });
     const again = await (await fetch(`${base}/api/${user}/lights`)).json();

@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "homekit-easy",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "news": {
+      "0.2.1": {
+        "en": "Dimmer with its own on/off data point (KNX): switch on first, then the brightness; on/off follows the data point changed last (Alexa and Apple Home)",
+        "de": "Dimmer mit eigenem Ein/Aus-Datenpunkt (KNX): erst Ein, dann die Helligkeit; Ein/Aus richtet sich nach dem zuletzt geänderten Datenpunkt (Alexa und Apple Home)"
+      },
       "0.2.0": {
         "en": "Alexa voice control without cloud: tick \"auch für Alexa\" per device (local Hue bridge emulation for lights, dimmers, switches, outlets, fans, blinds)",
         "de": "Alexa-Sprachsteuerung ohne Cloud: Haken „auch für Alexa“ pro Gerät (lokale Hue-Bridge für Licht, Dimmer, Schalter, Steckdosen, Ventilatoren, Rollläden)"

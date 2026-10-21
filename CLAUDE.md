@@ -39,6 +39,11 @@ just a type + data points picked in an object browser. Setup page on its own por
   "Weg A": local Hue emulation in this adapter, same device list, tick "auch für Alexa". Owner's
   Alexa routines live in Amazon's cloud and can use these lamps as actions; triggering routines /
   TTS from ioBroker would be the alexa2 adapter (suggested for later).
+- 0.2.0 field: Alexa works with the owner's Echo devices. Dimmer with brightness only: perfect; with an
+  extra on/off data point Alexa got confused -> 0.2.1: brightness was written before "Ein" (a KNX dimmer
+  then jumps to its switch-on value) and the stale switch object decided on/off. Now switch first,
+  brightness 400 ms later, and on/off = whichever of the two data points changed last (`dimmerOn`,
+  `x.ts`); same for the HomeKit dimmer.
 
 ## Conventions
 
