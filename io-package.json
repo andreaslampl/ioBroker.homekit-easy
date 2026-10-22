@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "homekit-easy",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "news": {
+      "0.4.1": {
+        "en": "Setup page: button \"Aus SmartView\" takes over SmartView tiles (they get \"auch in Apple Home\" there)",
+        "de": "Einrichtungsseite: Knopf „Aus SmartView …“ übernimmt SmartView-Kacheln (sie bekommen dort „auch in Apple Home“)"
+      },
       "0.4.0": {
         "en": "Works with SmartView: tiles with \"auch in Apple Home\" are created here automatically, SmartView can take over the devices from here as tiles",
         "de": "Zusammen mit SmartView: Kacheln mit „auch in Apple Home“ werden hier automatisch angelegt, SmartView kann die Geräte von hier als Kacheln übernehmen"

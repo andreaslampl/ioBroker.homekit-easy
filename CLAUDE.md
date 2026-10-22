@@ -36,6 +36,8 @@ just a type + data points picked in an object browser. Setup page on its own por
 - Messages (0.4.0, `common.messagebox`): `devices` -> {devices, types} for anyone; `sync` {devices} only from
   `smartview.N` -> `DeviceStore.mergeFrom(source, list)`: devices get `source`, same id = update (alexa/enabled
   kept), devices of that source not listed = removed, others untouched. Setup page tags them "SmartView".
+  0.4.1: button "Aus SmartView …" (`/api/smartview`, `/api/smartview/link` -> sendTo smartview 'tiles' / 'link';
+  SmartView ticks the tiles, saves and syncs back, so SmartView stays the owner of those devices).
 - `www/` – vanilla JS setup page; `picker.js` = same object browser as ioBroker.logik/smartview.
 - `test/` – `node --test`; hap-controller 0.10.2 (devDependency) is a real HomeKit client: pairing,
   read/write, events, snapshot, doorbell event, SRTP stream (needs ffmpeg). Separate files because

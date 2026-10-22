@@ -35,4 +35,20 @@ test('SmartView creates, updates and removes its devices; other devices stay', a
     r = await adapter.message('smartview.0', 'devices', {});
     assert.equal(r.devices.length, 2);
     assert.equal(r.types.light, 'Licht (Ein/Aus)');
+
+    // "Aus SmartView übernehmen": not installed -> button hidden; installed -> tiles, link
+    assert.equal((await api('smartview')).body.missing, true);
+    adapter.objects['system.adapter.smartview.0'] = { type: 'instance', common: { name: 'smartview' } };
+    adapter.foreign['system.adapter.smartview.0.alive'] = { val: true, ack: true };
+    const linked = [];
+    adapter.handlers = {
+        'smartview.0': (command, message) =>
+            command === 'tiles'
+                ? { tiles: [{ page: 'eg', pageName: 'EG', tile: 'l1', label: 'Licht', homekit: '', default: 'light', choices: [['light', 'Licht']] }] }
+                : (linked.push(...message.tiles), { ok: true, linked: message.tiles.length, created: 1 }),
+    };
+    assert.equal((await api('smartview')).body.tiles[0].tile, 'l1');
+    r = (await api('smartview/link', { method: 'POST', body: JSON.stringify([{ page: 'eg', tile: 'l1', homekit: 'light' }]) })).body;
+    assert.equal(r.linked, 1);
+    assert.deepEqual(linked, [{ page: 'eg', tile: 'l1', homekit: 'light' }]);
 });

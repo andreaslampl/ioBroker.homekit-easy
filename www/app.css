@@ -98,3 +98,8 @@ body { overflow-x: hidden; }
 .pfoot { display: flex; gap: 8px; align-items: center; padding: 10px 14px; }
 .pinfo { flex: 1; min-width: 0; }
 .pid { font-family: ui-monospace, monospace; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.svrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.svrow .check { flex: 1; min-width: 180px; }
+.svrow select { width: auto; max-width: 220px; }
+.sheet .warn { color: var(--bad); }
+#fromSv { white-space: nowrap; }

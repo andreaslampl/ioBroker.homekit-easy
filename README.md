@@ -108,6 +108,8 @@ Wer auch den Adapter **SmartView** nutzt, muss nichts doppelt anlegen:
   Haken weg oder Kachel gelöscht = das Gerät verschwindet hier wieder. In der Liste sind diese Geräte mit
   **SmartView** markiert – Name und Datenpunkte bitte in SmartView ändern. „In Apple Home anzeigen“ und
   „auch für Alexa“ stellst du hier ein, das bleibt.
+- Oder von hier aus: **„Aus SmartView …“** (neben „＋ Gerät“) zeigt die passenden SmartView-Kacheln; anhaken,
+  bei Schaltern wählen ob Licht/Steckdose/…, „Übernehmen“. SmartView setzt dort den Haken und legt die Geräte hier an.
 - Umgekehrt: Wer hier angefangen hat, holt seine Geräte in SmartView mit **„+ Kachel“ → „Aus homekit-easy
   übernehmen …“** als Kacheln. Sie bleiben verknüpft – ändert man die Kachel, ändert sich das Gerät hier mit.
 

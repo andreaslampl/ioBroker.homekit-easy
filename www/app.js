@@ -381,8 +381,104 @@ async function save() {
   }
 }
 
+// ---------------- take over tiles from SmartView ----------------
+
+async function fromSmartview() {
+  if (dirty() && !confirm('Es gibt ungespeicherte Änderungen. Zuerst speichern?')) return;
+  if (dirty()) await save();
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  const sh = document.createElement('div');
+  sh.className = 'sheet form';
+  sh.innerHTML = '<h3><span class="grow">Aus SmartView übernehmen</span><button type="button" data-x>✕</button></h3><p class="muted">Kacheln werden geladen …</p>';
+  ov.appendChild(sh);
+  document.body.appendChild(ov);
+  const close = () => ov.remove();
+  sh.querySelector('[data-x]').onclick = close;
+  const res = await api('smartview').catch(e => ({ error: e.message }));
+  sh.querySelector('p').remove();
+  if (res.error) {
+    sh.insertAdjacentHTML('beforeend', '<p class="warn">' + esc(res.error) + '</p>');
+    return;
+  }
+  const intro = document.createElement('p');
+  intro.className = 'help';
+  intro.textContent = 'Die gewählten Kacheln bekommen in SmartView den Haken „auch in Apple Home“ und erscheinen hier als Geräte. Name und Datenpunkte kommen aus SmartView und werden dort geändert.';
+  sh.appendChild(intro);
+  const picks = [];
+  let lastPage = null;
+  for (const t of res.tiles) {
+    if (t.pageName !== lastPage) {
+      const h = document.createElement('div');
+      h.className = 'group';
+      h.textContent = t.pageName || t.page;
+      sh.appendChild(h);
+      lastPage = t.pageName;
+    }
+    const row = document.createElement('div');
+    row.className = 'svrow';
+    const l = document.createElement('label');
+    l.className = 'check';
+    const i = document.createElement('input');
+    i.type = 'checkbox';
+    i.checked = Boolean(t.homekit);
+    i.disabled = Boolean(t.homekit);
+    l.append(i, document.createTextNode(t.label + (t.homekit ? ' (schon in Apple Home)' : '')));
+    row.appendChild(l);
+    let sel = null;
+    if (!t.homekit && t.choices.length > 1) {
+      sel = document.createElement('select');
+      for (const [v, txt] of t.choices) {
+        const o = document.createElement('option');
+        o.value = v;
+        o.textContent = txt;
+        sel.appendChild(o);
+      }
+      sel.value = t.default;
+      row.appendChild(sel);
+    }
+    sh.appendChild(row);
+    if (!t.homekit) picks.push({ i, sel, t });
+  }
+  if (!res.tiles.length) sh.insertAdjacentHTML('beforeend', '<p class="muted">In SmartView gibt es keine passenden Kacheln (Licht, Schalter, Dimmer, Rollladen, Heizung, Anzeige, Kamera).</p>');
+  const buttons = document.createElement('div');
+  buttons.className = 'buttons';
+  const all = document.createElement('button');
+  all.type = 'button';
+  all.textContent = 'Alle';
+  all.onclick = () => picks.forEach(p => (p.i.checked = true));
+  const grow = document.createElement('span');
+  grow.className = 'grow';
+  const ok = document.createElement('button');
+  ok.type = 'button';
+  ok.className = 'primary';
+  ok.textContent = 'Übernehmen';
+  ok.onclick = async () => {
+    const tiles = picks.filter(p => p.i.checked).map(p => ({ page: p.t.page, tile: p.t.tile, homekit: p.sel ? p.sel.value : p.t.default }));
+    if (!tiles.length) return close();
+    ok.disabled = true;
+    const r = await api('smartview/link', { method: 'POST', body: JSON.stringify(tiles) }).catch(e => ({ error: e.message }));
+    if (r.error) {
+      toast(r.error, true);
+      ok.disabled = false;
+      return;
+    }
+    close();
+    devices = await api('devices');
+    saved = JSON.stringify(devices);
+    renderList();
+    loadPairing();
+    toast(r.linked + ' Gerät(e) aus SmartView übernommen');
+  };
+  buttons.append(all, grow, ok);
+  sh.appendChild(buttons);
+}
+
 (async () => {
   $('save').onclick = save;
+  $('fromSv').onclick = fromSmartview;
+  // the button only when SmartView is installed
+  api('smartview').then(r => ($('fromSv').hidden = Boolean(r.missing))).catch(() => {});
   $('add').onclick = () => edit({ id: newId(), type: 'light', name: '', enabled: true }, true);
   window.addEventListener('beforeunload', e => {
     if (dirty()) {

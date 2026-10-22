@@ -70,6 +70,11 @@ class FakeAdapter extends EventEmitter {
     sendTo(to, command, message, callback) {
         this.sent = this.sent || [];
         this.sent.push({ to, command, message, callback });
+        // another adapter answering: this.handlers[instance](command, message)
+        const h = this.handlers && this.handlers[to];
+        if (h && typeof callback === 'function') {
+            setImmediate(() => callback(h(command, message)));
+        }
     }
     /** another adapter sends a message; resolves with the answer */
     message(from, command, message) {

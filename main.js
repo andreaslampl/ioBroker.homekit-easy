@@ -126,6 +126,8 @@ class HomekitEasy extends utils.Adapter {
                     alexa: this.alexaInfo(),
                 }),
                 resetPairing: () => this.resetPairing(),
+                smartviewTiles: () => this.askSmartview('tiles', {}),
+                smartviewLink: tiles => this.askSmartview('link', { tiles }),
             },
         });
         try {
@@ -185,6 +187,29 @@ class HomekitEasy extends utils.Adapter {
             this.log.warn(`Message ${obj.command} from ${from}: ${err.message}`);
             reply({ error: err.message });
         }
+    }
+
+    /** sendTo the first SmartView instance; resolves with its answer or {error}. */
+    async askSmartview(command, message) {
+        const objs = await this.getForeignObjectsAsync('system.adapter.smartview.*', 'instance').catch(() => ({}));
+        const instance = Object.keys(objs || {})
+            .map(id => id.replace('system.adapter.', ''))
+            .filter(id => /^smartview\.\d+$/.test(id))
+            .sort()[0];
+        if (!instance) {
+            return { error: 'SmartView ist nicht installiert', missing: true };
+        }
+        const alive = await this.getForeignStateAsync(`system.adapter.${instance}.alive`).catch(() => null);
+        if (!alive || !alive.val) {
+            return { error: `${instance} läuft nicht` };
+        }
+        return new Promise(resolve => {
+            const timer = setTimeout(() => resolve({ error: `${instance} antwortet nicht` }), 20000);
+            this.sendTo(instance, command, message, res => {
+                clearTimeout(timer);
+                resolve(res && typeof res === 'object' ? { instance, ...res } : { error: 'keine Antwort' });
+            });
+        });
     }
 
     async resetPairing() {
