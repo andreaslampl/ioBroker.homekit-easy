@@ -61,6 +61,9 @@ just a type + data points picked in an object browser. Setup page on its own por
 
 - 0.4.0: owner asked to avoid entering devices twice in SmartView and homekit-easy -> SmartView tile tick
   "auch in Apple Home" syncs here, SmartView can import devices from here (linked by `hkId`).
+- Field: owner could not share the home with the family. The bridge accepts added users (AddPairing,
+  `test/share.test.js`); cause was on Apple's side (home hub needed for sharing / company iPhone restrictions),
+  confirmed by the owner. Nothing to change in the adapter.
 
 ## Conventions
 
