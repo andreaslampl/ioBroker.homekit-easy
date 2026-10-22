@@ -123,7 +123,7 @@ function renderList() {
       const miss = missing(d);
       row.innerHTML = '<span class="ico">' + (ICONS[g] || '🔘') + '</span><div class="txt"><div class="name">' + esc(d.name) + '</div><div class="sub">' +
         esc(t ? t.label : d.type) + ' · ' + esc(mainState(d)) + '</div>' + (miss.length ? '<div class="warn">fehlt: ' + esc(miss.join(', ')) + '</div>' : '') + '</div>' +
-        (d.alexa ? '<span class="tag">Alexa</span>' : '') + (d.enabled === false ? '<span class="muted">nicht in Home</span>' : '');
+        (d.source ? '<span class="tag src" title="angelegt von ' + esc(d.source) + '">SmartView</span>' : '') + (d.alexa ? '<span class="tag">Alexa</span>' : '') + (d.enabled === false ? '<span class="muted">nicht in Home</span>' : '');
       row.onclick = () => edit(d);
       list.appendChild(row);
     }
@@ -237,6 +237,12 @@ function edit(original, isNew) {
       if (og.children.length) sel.appendChild(og);
     }
     sel.value = d.type;
+    if (d.source) {
+      const h = document.createElement('div');
+      h.className = 'help srcnote';
+      h.textContent = 'Dieses Gerät kommt aus SmartView (' + d.source + ', Haken „auch in HomeKit“ an der Kachel). Name und Datenpunkte bitte dort ändern – Änderungen hier überschreibt SmartView beim nächsten Speichern. „In Apple Home anzeigen“ und „auch für Alexa“ bleiben so, wie du sie hier setzt.';
+      sh.appendChild(h);
+    }
     field(sh, 'Art', sel);
     sel.onchange = () => {
       collect();
@@ -343,7 +349,7 @@ function edit(original, isNew) {
 
   function collect() {
     const t = typeOf(d);
-    const keep = new Set(['id', 'type', 'name', 'enabled', ...(t.alexa ? ['alexa'] : []), ...t.fields.map(f => f[0]), ...t.options.map(o => o[0])]);
+    const keep = new Set(['id', 'type', 'name', 'enabled', 'source', ...(t.alexa ? ['alexa'] : []), ...t.fields.map(f => f[0]), ...t.options.map(o => o[0])]);
     for (const k of Object.keys(d)) if (!keep.has(k)) delete d[k];
     for (const [key, input] of Object.entries(inputs)) {
       if (input.type === 'checkbox') d[key] = input.checked;

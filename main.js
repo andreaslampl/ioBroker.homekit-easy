@@ -47,6 +47,7 @@ class HomekitEasy extends utils.Adapter {
         this.on('ready', this.onReady.bind(this));
         this.on('unload', this.onUnload.bind(this));
         this.on('stateChange', this.onStateChange.bind(this));
+        this.on('message', this.onMessage.bind(this));
     }
 
     async onReady() {
@@ -148,6 +149,42 @@ class HomekitEasy extends utils.Adapter {
         await this.startAlexa();
         await this.setState('info.devices', this.bridge.accessories.size, true);
         return devices;
+    }
+
+    /**
+     * Messages from other adapters:
+     *   devices -> {devices, types}  (SmartView: "aus homekit-easy übernehmen")
+     *   sync {devices}               (SmartView: tiles with "auch in HomeKit")
+     */
+    async onMessage(obj) {
+        if (!obj || !obj.command) {
+            return;
+        }
+        const reply = res => obj.callback && this.sendTo(obj.from, obj.command, res, obj.callback);
+        const from = String(obj.from || '').replace(/^system\.adapter\./, '');
+        if (!this.store || !this.bridge) {
+            return reply({ error: 'homekit-easy startet noch' });
+        }
+        try {
+            if (obj.command === 'devices') {
+                return reply({ devices: this.store.devices, types: Object.fromEntries(Object.entries(this.types).map(([k, t]) => [k, t.label])) });
+            }
+            if (obj.command === 'sync') {
+                if (!/^smartview\.\d+$/.test(from)) {
+                    return reply({ error: `sync from ${from} not allowed` });
+                }
+                const m = this.store.mergeFrom(from, obj.message && obj.message.devices);
+                if (m.created || m.updated || m.removed) {
+                    await this.saveDevices(m.list);
+                    this.log.info(`${from}: ${m.created} device(s) created, ${m.updated} updated, ${m.removed} removed`);
+                }
+                return reply({ ok: true, created: m.created, updated: m.updated, removed: m.removed, total: this.store.devices.filter(d => d.source === from).length });
+            }
+            reply({ error: `unknown command ${obj.command}` });
+        } catch (err) {
+            this.log.warn(`Message ${obj.command} from ${from}: ${err.message}`);
+            reply({ error: err.message });
+        }
     }
 
     async resetPairing() {

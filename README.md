@@ -99,7 +99,18 @@ Voraussetzungen: **Port 80** am ioBroker-Rechner muss frei sein (die Echos suche
 `sudo ss -tlnp | grep ':80 '`), Echo und ioBroker im selben Netz. Die Einrichtungsseite zeigt, ob die
 Alexa-Bridge läuft und wann zuletzt ein Echo nachgefragt hat. Neue Geräte: wieder „Alexa, suche Geräte“.
 
-## Kameras
+## Zusammen mit SmartView
+
+Wer auch den Adapter **SmartView** nutzt, muss nichts doppelt anlegen:
+
+- In SmartView hat jede Kachel (Licht, Schalter, Dimmer, Rollladen, Heizung, Anzeige, Kamera) den Haken
+  **„auch in Apple Home“**. Beim Speichern in SmartView legt homekit-easy das Gerät an und hält es aktuell;
+  Haken weg oder Kachel gelöscht = das Gerät verschwindet hier wieder. In der Liste sind diese Geräte mit
+  **SmartView** markiert – Name und Datenpunkte bitte in SmartView ändern. „In Apple Home anzeigen“ und
+  „auch für Alexa“ stellst du hier ein, das bleibt.
+- Umgekehrt: Wer hier angefangen hat, holt seine Geräte in SmartView mit **„+ Kachel“ → „Aus homekit-easy
+  übernehmen …“** als Kacheln. Sie bleiben verknüpft – ändert man die Kachel, ändert sich das Gerät hier mit.
+
 
 Die Kameras kommen aus dem Adapter **livecam** (`livecam.0.cameras.<name>`). HomeKit Easy holt
 Standbilder über livecam und wandelt das Live-Bild mit ffmpeg in H.264 für Apple um. Wer eine
@@ -127,6 +138,9 @@ geklingelt“ mit Bild am iPhone und an der Apple Watch.
 - Getestet mit einem echten HomeKit-Client (hap-controller) – mit dem iPhone noch nicht.
 
 ## Changelog
+
+### 0.4.0
+- Zusammen mit SmartView: Kacheln mit „auch in Apple Home“ werden hier automatisch angelegt, SmartView kann die Geräte von hier als Kacheln übernehmen.
 
 ### 0.3.0
 - Neuer Typ „Farblicht (RGBW)“ für KNX und Shelly: Apple Home (Farbrad, Weißtöne) und Alexa (Farben, warmweiß).

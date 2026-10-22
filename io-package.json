@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "homekit-easy",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "news": {
+      "0.4.0": {
+        "en": "Works with SmartView: tiles with \"auch in Apple Home\" are created here automatically, SmartView can take over the devices from here as tiles",
+        "de": "Zusammen mit SmartView: Kacheln mit „auch in Apple Home“ werden hier automatisch angelegt, SmartView kann die Geräte von hier als Kacheln übernehmen"
+      },
       "0.3.0": {
         "en": "New type color light (RGBW) for KNX and Shelly: Apple Home color wheel and white tones, Alexa colors",
         "de": "Neuer Typ Farblicht (RGBW) für KNX und Shelly: Apple Home mit Farbrad und Weißtönen, Alexa mit Farben"
@@ -34,6 +38,7 @@
     "license": "MIT",
     "platform": "Javascript/Node.js",
     "mode": "daemon",
+    "messagebox": true,
     "icon": "homekit-easy.png",
     "extIcon": "https://raw.githubusercontent.com/andreaslampl/ioBroker.homekit-easy/main/admin/homekit-easy.png",
     "readme": "https://github.com/andreaslampl/ioBroker.homekit-easy/blob/main/README.md",

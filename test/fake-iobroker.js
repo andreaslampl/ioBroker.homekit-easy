@@ -66,6 +66,25 @@ class FakeAdapter extends EventEmitter {
             setTimeout(() => this.change(id, val, true), this.ackDelay);
         }
     }
+    /** answers to messages (sendTo with obj.callback) */
+    sendTo(to, command, message, callback) {
+        this.sent = this.sent || [];
+        this.sent.push({ to, command, message, callback });
+    }
+    /** another adapter sends a message; resolves with the answer */
+    message(from, command, message) {
+        return new Promise(resolve => {
+            const before = (this.sent || []).length;
+            this.emit('message', { from: `system.adapter.${from}`, command, message, callback: { id: 1, ack: false } });
+            const t = setInterval(() => {
+                const r = (this.sent || []).slice(before).find(x => x.command === command);
+                if (r) {
+                    clearInterval(t);
+                    resolve(r.message);
+                }
+            }, 10);
+        });
+    }
     /** a device or another adapter changes a data point */
     change(id, val, ack = true) {
         this.foreign[id] = { val, ack, ts: Date.now(), lc: Date.now() };

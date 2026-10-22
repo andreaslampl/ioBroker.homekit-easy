@@ -33,6 +33,9 @@ just a type + data points picked in an object browser. Setup page on its own por
   device does not respond. `lib/alexa.js` maps device types to lamps (light/dimmer/switch/outlet/fan/
   blind); locks, garage, security deliberately not. Light numbers stable in alexa.json (+ bridge MAC).
   Starts only when a device has `alexa: true`. Not yet tested with the owner's Echo devices.
+- Messages (0.4.0, `common.messagebox`): `devices` -> {devices, types} for anyone; `sync` {devices} only from
+  `smartview.N` -> `DeviceStore.mergeFrom(source, list)`: devices get `source`, same id = update (alexa/enabled
+  kept), devices of that source not listed = removed, others untouched. Setup page tags them "SmartView".
 - `www/` – vanilla JS setup page; `picker.js` = same object browser as ioBroker.logik/smartview.
 - `test/` – `node --test`; hap-controller 0.10.2 (devDependency) is a real HomeKit client: pairing,
   read/write, events, snapshot, doorbell event, SRTP stream (needs ffmpeg). Separate files because
@@ -53,6 +56,9 @@ just a type + data points picked in an object browser. Setup page on its own por
   values (Shelly polling) do not count as a change.
 - 0.3.0: owner asked for RGBW (KNX and Shelly) -> type "Farblicht (RGBW)" (lib/color.js). Not yet
   tested with the owner's actuators.
+
+- 0.4.0: owner asked to avoid entering devices twice in SmartView and homekit-easy -> SmartView tile tick
+  "auch in Apple Home" syncs here, SmartView can import devices from here (linked by `hkId`).
 
 ## Conventions
 
