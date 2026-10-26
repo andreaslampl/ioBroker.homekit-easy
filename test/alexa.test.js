@@ -17,22 +17,25 @@ function freeUdpPort() {
     });
 }
 
-test('Alexa: discovery, lights for the ticked devices, on/off and percent like an Echo, no locks', async t => {
+test('Alexa: discovery, lights for the ticked devices, on/off and percent like an Echo, locks only lock', async t => {
     const alexaPort = await freePort();
     const ssdpPort = await freeUdpPort();
     const { adapter, api } = await startAdapter(t, { alexaPort }, undefined, a => {
         a.ssdpPort = ssdpPort;
+        a.logs = [];
+        a.log = { debug() {}, info() {}, warn: m => a.logs.push(m), error: m => a.logs.push(m) };
     });
     // without ticked devices the Hue emulation does not run
     assert.equal((await api('pairing')).body.alexa.running, false);
     const catalog = (await api('catalog')).body;
     assert.equal(catalog.find(c => c.type === 'dimmer').alexa, true);
-    assert.equal(catalog.find(c => c.type === 'lock').alexa, false);
+    assert.match(catalog.find(c => c.type === 'lock').alexa, /zusperren/);
+    assert.equal(catalog.find(c => c.type === 'contact').alexa, false);
 
     const devices = DEVICES.map(d => (['licht', 'essen', 'rollo', 'schloss'].includes(d.id) ? { ...d, alexa: true } : d));
     devices.push({ id: 'szene', type: 'switch', name: 'Fernsehen', state: 'knx.0.Licht.Wohnzimmer', alexa: true });
     const saved = (await api('devices', { method: 'PUT', body: JSON.stringify(devices) })).body;
-    assert.equal(saved.find(d => d.id === 'schloss').alexa, undefined, 'locks never go to Alexa');
+    assert.equal(saved.find(d => d.id === 'schloss').alexa, true);
     await until(async () => (await api('pairing')).body.alexa.running);
 
     // SSDP: the Echo searches, the bridge answers with its description
@@ -51,8 +54,8 @@ test('Alexa: discovery, lights for the ticked devices, on/off and percent like a
     const user = (await (await fetch(`${base}/api`, { method: 'POST', body: '{"devicetype":"Echo"}' })).json())[0].success.username;
     const lights = await (await fetch(`${base}/api/${user}/lights`)).json();
     const byName = n => Object.entries(lights).find(([, l]) => l.name === n);
-    assert.equal(Object.keys(lights).length, 4);
-    assert.ok(!byName('Haustür Schloss'));
+    assert.equal(Object.keys(lights).length, 5);
+    assert.equal(byName('Haustür Schloss')[1].type, 'On/Off plug-in unit');
     const [essenId, essen] = byName('Essen');
     assert.equal(essen.type, 'Dimmable light');
     assert.equal(essen.state.bri, Math.round(0.4 * 254));
@@ -77,6 +80,20 @@ test('Alexa: discovery, lights for the ticked devices, on/off and percent like a
     await until(() => adapter.foreign['knx.0.Rollladen.Wohnzimmer'].val === 70);
     await put(rolloId, { on: true });
     await until(() => adapter.foreign['knx.0.Rollladen.Wohnzimmer'].val === 0);
+
+    // lock: "ein" locks; "aus" (unlock) is refused without the device option, allowed with it
+    const [lockId] = byName('Haustür Schloss');
+    await put(lockId, { on: true });
+    await until(() => adapter.foreign['knx.0.Schloss'].val === true);
+    const nWrites = adapter.writes.length;
+    await put(lockId, { on: false });
+    await until(() => adapter.logs.some(l => /Alexa wollte „Haustür Schloss“ aufsperren – nicht erlaubt/.test(l)));
+    assert.equal(adapter.writes.length, nWrites);
+    assert.equal((await (await fetch(`${base}/api/${user}/lights/${lockId}`)).json()).state.on, true, 'Alexa sees it still locked');
+    await api('devices', { method: 'PUT', body: JSON.stringify(saved.map(d => (d.id === 'schloss' ? { ...d, alexaUnsafe: true } : d))) });
+    await put(lockId, { on: false });
+    await until(() => adapter.foreign['knx.0.Schloss'].val === false);
+    await api('devices', { method: 'PUT', body: JSON.stringify(saved) });
 
     // dimmer with its own on/off data point (KNX): switch first, then the percent; state = newest
     adapter.add('knx.0.Licht.Bad', { name: 'Bad Helligkeit', type: 'number', role: 'level.dimmer', write: true }, 0);
@@ -112,8 +129,8 @@ test('Alexa: discovery, lights for the ticked devices, on/off and percent like a
     await api('devices', { method: 'PUT', body: JSON.stringify(saved.filter(d => d.id !== 'licht')) });
     const again = await (await fetch(`${base}/api/${user}/lights`)).json();
     assert.equal(again[essenId].name, 'Essen');
-    assert.equal(Object.keys(again).length, 3);
+    assert.equal(Object.keys(again).length, 4);
     const info = (await api('pairing')).body.alexa;
-    assert.equal(info.devices, 3);
+    assert.equal(info.devices, 4);
     assert.ok(info.lastSeen);
 });

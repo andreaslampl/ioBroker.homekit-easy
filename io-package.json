@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "homekit-easy",
-    "version": "0.4.2",
+    "version": "0.5.0",
     "news": {
+      "0.5.0": {
+        "en": "Alexa: door lock (on = lock), gate (off = close), alarm system (on = arm) and heating (percent = °C setpoint); unlocking/opening/disarming only with the device option 'Alexa darf auch öffnen' (no PIN over the Hue emulation); blinds with only up/down work with Alexa",
+        "de": "Alexa: Türschloss („ein“ = zusperren), Tor („aus“ = schließen), Alarmanlage („ein“ = scharf) und Heizung (Prozent = °C-Sollwert); Aufsperren/Öffnen/Unscharf nur mit dem Geräte-Haken „Alexa darf auch öffnen“ (ohne PIN über die Hue-Emulation); Rollläden nur mit Auf/Ab gehen mit Alexa"
+      },
       "0.4.2": {
         "en": "Blind: position is optional now, new up/down data point (true = down, false = up, can be inverted); fully open/closed drives with up/down, positions in between with the position; a boolean data point from SmartView is used as up/down",
         "de": "Jalousie: Position ist jetzt optional, neuer Auf/Ab-Datenpunkt (true = ab, false = auf, umkehrbar); ganz auf/zu fährt über Auf/Ab, Zwischenstellungen über die Position; ein true/false-Datenpunkt aus SmartView wird als Auf/Ab verwendet"

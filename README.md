@@ -95,9 +95,21 @@ finden sie selbst.
 | Schalter, Steckdose | ein/aus (z. B. Szenen) |
 | Ventilator | ein/aus, mit Stufen-Datenpunkt auch Prozent |
 | Rollladen | „ein“ = auf, „aus“ = zu, „auf 30 Prozent“ = 30 % offen |
+| Heizung | „auf 22 Prozent“ = 22 °C Sollwert, „aus“ = kleinster Sollwert |
+| Türschloss | „ein“ = zusperren; „aus“ = aufsperren nur mit Haken* |
+| Garagentor / Tor | „aus“ = schließen; „ein“ = öffnen nur mit Haken* |
+| Alarmanlage | „ein“ = scharf (Abwesend); „aus“ = unscharf nur mit Haken* |
 
-Heizung, Sensoren, Schlösser, Garagentore und Alarmanlagen gibt es für Alexa **nicht** – Alexa kennt
-bei einer Hue-Bridge nur Lampen, und Türen/Alarm sollen nicht ohne PIN per Zuruf aufgehen.
+\* Haken **„Alexa darf auch öffnen“** (bzw. „… unscharf schalten“) beim Gerät. Über die Hue-Bridge kann
+Alexa **keinen Sprach-PIN** abfragen – mit dem Haken könnte jeder in Hörweite eines Echos (oder ein Fernseher)
+die Tür aufsperren. Ohne Haken wird es abgelehnt und im Log gemeldet („Alexa wollte … – nicht erlaubt“).
+
+Natürlicher klingt es mit einer **Alexa-Routine**: z. B. „Alexa, sperr die Haustür ab“ → Aktion
+Smart Home → „Haustür Schloss“ einschalten.
+
+Sensoren (Temperatur, Kontakte, Bewegung, …), Kameras und Taster gehen mit Alexa **nicht**: Alexa kennt
+bei einer Hue-Bridge nur Lampen und kann von einer Lampe keinen Messwert ansagen. Dafür bräuchte es den
+iot-Adapter (Cloud).
 
 Voraussetzungen: **Port 80** am ioBroker-Rechner muss frei sein (die Echos suchen nur dort; prüfen mit
 `sudo ss -tlnp | grep ':80 '`), Echo und ioBroker im selben Netz. Die Einrichtungsseite zeigt, ob die

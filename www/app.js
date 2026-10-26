@@ -302,10 +302,10 @@ function edit(original, isNew) {
       al.append(ai, document.createTextNode('auch für Alexa (Sprachsteuerung)'));
       sh.appendChild(al);
       inputs.alexa = ai;
-      if (d.type === 'blind') {
+      if (typeof t.alexa === 'string') {
         const h = document.createElement('div');
         h.className = 'help';
-        h.textContent = 'Alexa sieht den Rollladen als Lampe: „ein“ = auf, „aus“ = zu, „auf 30 Prozent“ = 30 % offen.';
+        h.textContent = t.alexa;
         sh.appendChild(h);
       }
     }

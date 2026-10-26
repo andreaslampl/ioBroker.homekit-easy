@@ -11,7 +11,7 @@ const { cameraTypes } = require('./lib/camera');
 const { DeviceStore } = require('./lib/store');
 const { SetupServer } = require('./lib/server');
 const { HueBridge } = require('./lib/hue');
-const { ALEXA_TYPES, alexaLights } = require('./lib/alexa');
+const { ALEXA_TYPES, ALEXA_HELP, alexaLights } = require('./lib/alexa');
 
 const CAMERA_ID = /^livecam\.\d+\.cameras\.[^.]+$/;
 
@@ -110,7 +110,7 @@ class HomekitEasy extends utils.Adapter {
                 catalog: () =>
                     [...catalog(), ...Object.entries(extraTypes).map(([type, t]) => ({ type, label: t.label, group: t.group, fields: t.fields, options: t.options }))].map(c => ({
                         ...c,
-                        alexa: Boolean(ALEXA_TYPES[c.type]),
+                        alexa: ALEXA_TYPES[c.type] ? ALEXA_HELP[c.type] || true : false,
                     })),
                 devices: () => this.store.devices,
                 saveDevices: list => this.saveDevices(list),
@@ -253,7 +253,7 @@ class HomekitEasy extends utils.Adapter {
     }
 
     alexaLights() {
-        return alexaLights(this.store.devices, this.x, id => this.alexaId(id));
+        return alexaLights(this.store.devices, this.x, id => this.alexaId(id), this.log);
     }
 
     /** Start the Hue emulation as soon as one device is meant for Alexa. */

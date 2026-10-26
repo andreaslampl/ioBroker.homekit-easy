@@ -31,7 +31,7 @@ just a type + data points picked in an object browser. Setup page on its own por
   port 80 - Echo devices insist on 80; description.xml "Philips hue bridge 2012", POST /api user,
   lights/state PUT {on, bri}); commanded state is reported back for 8 s so Alexa does not say the
   device does not respond. `lib/alexa.js` maps device types to lamps (light/dimmer/switch/outlet/fan/
-  blind); locks, garage, security deliberately not. Light numbers stable in alexa.json (+ bridge MAC).
+  blind; since 0.5.0 also lock/garage/security/thermostat, see below). Light numbers stable in alexa.json (+ bridge MAC).
   Starts only when a device has `alexa: true`. Not yet tested with the owner's Echo devices.
 - Messages (0.4.0, `common.messagebox`): `devices` -> {devices, types} for anyone; `sync` {devices} only from
   `smartview.N` -> `DeviceStore.mergeFrom(source, list)`: devices get `source`, same id = update (alexa/enabled
@@ -66,6 +66,11 @@ just a type + data points picked in an object browser. Setup page on its own por
   `blindIO()` in alexa.js used by HomeKit and Alexa: 0/100 % via move when present, in between via position, move
   only -> nearer end; a boolean `state` (SmartView tile with up/down) counts as move (meta type). Position without
   feedback: last commanded, else from the move value.
+- 0.5.0: owner: "Türschloss auch in Alexa, eigentlich sollten alle gehen". Hue lamps only, no voice PIN possible ->
+  lock (ein = lock), garage (aus = close, ein = open), security (ein = valueAway, aus = valueOff), thermostat
+  (percent = °C setpoint, aus = min). The unsafe direction (unlock/open/disarm) only with device option
+  `alexaUnsafe`, else `refused()` logs a warning and returns false (hue.js then drops the echoed state). Sensors,
+  cameras, buttons stay out (Alexa cannot read values from lamps). Catalog `alexa` = help text (ALEXA_HELP) or true.
 - Field: owner could not share the home with the family. The bridge accepts added users (AddPairing,
   `test/share.test.js`); cause was on Apple's side (home hub needed for sharing / company iPhone restrictions),
   confirmed by the owner. Nothing to change in the adapter.
