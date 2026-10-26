@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "homekit-easy",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "news": {
+      "0.4.2": {
+        "en": "Blind: position is optional now, new up/down data point (true = down, false = up, can be inverted); fully open/closed drives with up/down, positions in between with the position; a boolean data point from SmartView is used as up/down",
+        "de": "Jalousie: Position ist jetzt optional, neuer Auf/Ab-Datenpunkt (true = ab, false = auf, umkehrbar); ganz auf/zu fährt über Auf/Ab, Zwischenstellungen über die Position; ein true/false-Datenpunkt aus SmartView wird als Auf/Ab verwendet"
+      },
       "0.4.1": {
         "en": "Setup page: button \"Aus SmartView\" takes over SmartView tiles (they get \"auch in Apple Home\" there)",
         "de": "Einrichtungsseite: Knopf „Aus SmartView …“ übernimmt SmartView-Kacheln (sie bekommen dort „auch in Apple Home“)"

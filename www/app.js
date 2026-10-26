@@ -94,7 +94,11 @@ function mainState(d) {
 
 function missing(d) {
   const t = typeOf(d);
-  return t ? t.fields.filter(f => f[3] && !d[f[0]]).map(f => f[1]) : [];
+  if (!t) return [];
+  const out = t.fields.filter(f => f[3] && !d[f[0]]).map(f => f[1]);
+  // e.g. blind: position or up/down, one of them is enough
+  if (t.anyOf && !t.anyOf.some(k => d[k])) out.push(t.anyOf.map(k => t.fields.find(f => f[0] === k)[1].replace(/ \(.*\)$/, '')).join(' oder '));
+  return out;
 }
 
 function renderList() {

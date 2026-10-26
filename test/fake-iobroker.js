@@ -135,6 +135,9 @@ function demoHouse(a, camBase = 'http://127.0.0.1:1') {
     a.add('shelly.0.SHRGBW2#1#1.color.Switch', { name: 'Switch', type: 'boolean', role: 'switch', write: true }, false);
     a.add('knx.0.Licht.Essen', { name: 'Dimmer Essen', type: 'number', role: 'level.dimmer', unit: '%', min: 0, max: 100, write: true }, 40);
     a.add('knx.0.Rollladen.Wohnzimmer', { name: 'Rollladen', type: 'number', role: 'level.blind', unit: '%', write: true }, 100);
+    a.add('knx.0.Jalousie.Position', { name: 'Jalousie Position', type: 'number', role: 'level.blind', unit: '%', write: true }, 50);
+    a.add('knx.0.Jalousie.AufAb', { name: 'Jalousie Auf/Ab', type: 'boolean', role: 'switch', write: true }, false);
+    a.add('knx.0.Markise.AufAb', { name: 'Markise Auf/Ab', type: 'boolean', role: 'switch', write: true }, false);
     a.add('knx.0.Rollladen.Stop', { name: 'Stopp', type: 'boolean', role: 'button', write: true }, false);
     a.add('shelly.0.Garage.Taster', { name: 'Garagentor Taster', type: 'boolean', role: 'button', write: true }, false);
     a.add('knx.0.Garage.Kontakt', { name: 'Garagentor offen', type: 'boolean', role: 'sensor.door', write: false }, false);

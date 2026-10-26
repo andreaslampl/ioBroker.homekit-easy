@@ -42,7 +42,7 @@ neu hinzufügen.
 | Dimmer | Helligkeit 0–100, Schalten (optional), Status | |
 | Farblicht (RGBW) | Rot, Grün, Blau, Weiß (optional), Helligkeit (optional, Shelly `gain`), Ein/Aus (optional) | Wertebereich 0–255 oder 0–100 % |
 | Ventilator / Lüftung | Ein/Aus, Stufe 0–100 (optional), Status | |
-| Rollladen / Jalousie / Markise | Position, Stopp (optional), Position-Status | 100 = zu |
+| Rollladen / Jalousie / Markise | Position in % und/oder Auf/Ab fahren (true = ab, false = auf), Stopp (optional), Position-Status | 100 = zu, Auf/Ab umgekehrt |
 | Garagentor / Tor | Befehl, Status offen/zu | Impuls oder Auf/Zu, Status invertiert |
 | Türschloss | Schalten (true = zu), Status | invertiert |
 | Heizung / Thermostat | Solltemperatur, Isttemperatur, Heizt gerade (optional) | Min, Max, Schritt |
@@ -53,6 +53,10 @@ neu hinzufügen.
 | Taster | Datenpunkt, der bei Tastendruck kommt | für Automationen in Home |
 | Kamera | Kamera aus livecam | eigene RTSP-Quelle (optional) |
 | Türklingel mit Kamera | Kamera aus livecam, Klingel-Datenpunkt | eigene RTSP-Quelle (optional) |
+
+**Rollladen mit Auf/Ab-Datenpunkt:** Es reicht die Position in %, nur der Auf/Ab-Datenpunkt (z. B. KNX 1-Bit:
+1 = hinunter, 0 = hinauf) oder beides. Mit beidem fährt „ganz auf“ / „ganz zu“ über Auf/Ab und Zwischenstellungen
+über die Position. Nur mit Auf/Ab fährt jede Stellung unter 50 % ganz zu, darüber ganz auf.
 
 Grundsätzlich: Apple Home schreibt **nur** in Datenpunkte, die als „Schalten/Befehl/Position…“
 eingetragen sind. Reine Sensoren sind nur lesbar.

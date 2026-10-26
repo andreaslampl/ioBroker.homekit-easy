@@ -70,6 +70,19 @@ test('Apple Home pairs with the PIN, reads and switches the devices, gets live u
     assert.equal(await read(pos), 0);
     await set(find('Rollladen', Service.WindowCovering, Characteristic.TargetPosition), 30);
     assert.deepEqual(adapter.writes.at(-1), ['knx.0.Rollladen.Wohnzimmer', 70, false]);
+    // position + up/down object (1 = down, 0 = up): fully closed/open drive with up/down, in between the position
+    const jTarget = find('Jalousie Küche', Service.WindowCovering, Characteristic.TargetPosition);
+    await set(jTarget, 0);
+    assert.deepEqual(adapter.writes.at(-1), ['knx.0.Jalousie.AufAb', true, false]);
+    await set(jTarget, 40);
+    assert.deepEqual(adapter.writes.at(-1), ['knx.0.Jalousie.Position', 40, false]);
+    await set(jTarget, 100);
+    assert.deepEqual(adapter.writes.at(-1), ['knx.0.Jalousie.AufAb', false, false]);
+    // only up/down: up (false) = open; any lower target drives down
+    assert.equal(await read(find('Markise', Service.WindowCovering, Characteristic.CurrentPosition)), 100);
+    await set(find('Markise', Service.WindowCovering, Characteristic.TargetPosition), 20);
+    assert.deepEqual(adapter.writes.at(-1), ['knx.0.Markise.AufAb', true, false]);
+    await until(async () => (await read(find('Markise', Service.WindowCovering, Characteristic.CurrentPosition))) === 0);
 
     // garage: impulse only when the state really has to change; contact = current state
     const door = find('Garage', Service.GarageDoorOpener, Characteristic.TargetDoorState);

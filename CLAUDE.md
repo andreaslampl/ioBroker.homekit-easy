@@ -61,6 +61,11 @@ just a type + data points picked in an object browser. Setup page on its own por
 
 - 0.4.0: owner asked to avoid entering devices twice in SmartView and homekit-easy -> SmartView tile tick
   "auch in Apple Home" syncs here, SmartView can import devices from here (linked by `hkId`).
+- 0.4.2: owner: blind only had a position, needs the up/down object (1 = down, 0 = up) -> fields `state` (position,
+  now optional) + `move` (+ option `moveInvert`), type `anyOf: ['state', 'move']` (setup page `missing()`);
+  `blindIO()` in alexa.js used by HomeKit and Alexa: 0/100 % via move when present, in between via position, move
+  only -> nearer end; a boolean `state` (SmartView tile with up/down) counts as move (meta type). Position without
+  feedback: last commanded, else from the move value.
 - Field: owner could not share the home with the family. The bridge accepts added users (AddPairing,
   `test/share.test.js`); cause was on Apple's side (home hub needed for sharing / company iPhone restrictions),
   confirmed by the owner. Nothing to change in the adapter.

@@ -53,6 +53,8 @@ const DEVICES = [
     { id: 'licht', type: 'light', name: 'Licht Wohnzimmer', state: 'knx.0.Licht.Wohnzimmer' },
     { id: 'essen', type: 'dimmer', name: 'Essen', state: 'knx.0.Licht.Essen' },
     { id: 'rollo', type: 'blind', name: 'Rollladen', state: 'knx.0.Rollladen.Wohnzimmer', stop: 'knx.0.Rollladen.Stop', closed100: true },
+    { id: 'jalousie', type: 'blind', name: 'Jalousie Küche', state: 'knx.0.Jalousie.Position', move: 'knx.0.Jalousie.AufAb' },
+    { id: 'markise', type: 'blind', name: 'Markise', move: 'knx.0.Markise.AufAb' },
     { id: 'garage', type: 'garage', name: 'Garage', command: 'shelly.0.Garage.Taster', status: 'knx.0.Garage.Kontakt', mode: 'impulse' },
     { id: 'schloss', type: 'lock', name: 'Haustür Schloss', state: 'knx.0.Schloss' },
     { id: 'heizung', type: 'thermostat', name: 'Heizung', state: 'knx.0.Heizung.Soll', actual: 'knx.0.Heizung.Ist' },
