@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "homekit-easy",
-    "version": "0.5.1",
+    "version": "0.5.2",
     "news": {
+      "0.5.2": {
+        "en": "Fixed: after every adapter update or restart Apple Home lost the bridge (stopping deleted the pairing data) - now the pairing, devices and rooms stay",
+        "de": "Behoben: Nach jedem Update oder Neustart des Adapters war die Bridge in Apple Home weg (beim Beenden wurden die Kopplungsdaten gelöscht) – jetzt bleiben Kopplung, Geräte und Räume erhalten"
+      },
       "0.5.1": {
         "en": "Blind: own tick 'Für Alexa umdrehen' - Alexa the other way round, Apple Home unchanged; Alexa options of devices from SmartView are kept when SmartView syncs",
         "de": "Rollladen: eigener Haken „Für Alexa umdrehen“ – Alexa andersherum, Apple Home bleibt; Alexa-Einstellungen von Geräten aus SmartView bleiben beim Abgleich erhalten"

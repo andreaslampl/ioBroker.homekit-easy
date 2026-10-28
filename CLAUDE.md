@@ -74,6 +74,10 @@ just a type + data points picked in an object browser. Setup page on its own por
 - 0.5.1: owner: blind direction right in Apple Home but reversed in Alexa (and the other way round with closed100) ->
   option `alexaInvert` (alexa.js blind: pct and commands mirrored, HomeKit untouched). `mergeFrom()` now also keeps
   `alexaUnsafe` / `alexaInvert` when SmartView syncs (they are set here, like alexa/enabled).
+- 0.5.2 field: after every update the bridge had to be removed from Home and paired again (rooms lost). Cause:
+  `stop()` called `Accessory.destroy()`, which deletes hap/AccessoryInfo.* and IdentifierCache.* -> every unload wiped
+  the pairing. Now only `unpublish()`; `resetPairing()` still removes the data on purpose. Reproduced with two
+  processes (pair, restart, connect with the old client keys); `test/persist.test.js` checks the files after unload.
 - Field: owner could not share the home with the family. The bridge accepts added users (AddPairing,
   `test/share.test.js`); cause was on Apple's side (home hub needed for sharing / company iPhone restrictions),
   confirmed by the owner. Nothing to change in the adapter.
