@@ -94,7 +94,7 @@ finden sie selbst.
 | Farblicht (RGBW) | ein/aus, Prozent, Farben, Weißtöne |
 | Schalter, Steckdose | ein/aus (z. B. Szenen) |
 | Ventilator | ein/aus, mit Stufen-Datenpunkt auch Prozent |
-| Rollladen | „ein“ = auf, „aus“ = zu, „auf 30 Prozent“ = 30 % offen |
+| Rollladen | „ein“ = auf, „aus“ = zu, „auf 30 Prozent“ = 30 % offen – mit Haken **„Für Alexa umdrehen“** andersherum (nur Alexa, Apple Home bleibt) |
 | Heizung | „auf 22 Prozent“ = 22 °C Sollwert, „aus“ = kleinster Sollwert |
 | Türschloss | „ein“ = zusperren; „aus“ = aufsperren nur mit Haken* |
 | Garagentor / Tor | „aus“ = schließen; „ein“ = öffnen nur mit Haken* |

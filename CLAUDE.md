@@ -71,6 +71,9 @@ just a type + data points picked in an object browser. Setup page on its own por
   (percent = °C setpoint, aus = min). The unsafe direction (unlock/open/disarm) only with device option
   `alexaUnsafe`, else `refused()` logs a warning and returns false (hue.js then drops the echoed state). Sensors,
   cameras, buttons stay out (Alexa cannot read values from lamps). Catalog `alexa` = help text (ALEXA_HELP) or true.
+- 0.5.1: owner: blind direction right in Apple Home but reversed in Alexa (and the other way round with closed100) ->
+  option `alexaInvert` (alexa.js blind: pct and commands mirrored, HomeKit untouched). `mergeFrom()` now also keeps
+  `alexaUnsafe` / `alexaInvert` when SmartView syncs (they are set here, like alexa/enabled).
 - Field: owner could not share the home with the family. The bridge accepts added users (AddPairing,
   `test/share.test.js`); cause was on Apple's side (home hub needed for sharing / company iPhone restrictions),
   confirmed by the owner. Nothing to change in the adapter.

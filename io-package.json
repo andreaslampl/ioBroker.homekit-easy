@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "homekit-easy",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "news": {
+      "0.5.1": {
+        "en": "Blind: own tick 'Für Alexa umdrehen' - Alexa the other way round, Apple Home unchanged; Alexa options of devices from SmartView are kept when SmartView syncs",
+        "de": "Rollladen: eigener Haken „Für Alexa umdrehen“ – Alexa andersherum, Apple Home bleibt; Alexa-Einstellungen von Geräten aus SmartView bleiben beim Abgleich erhalten"
+      },
       "0.5.0": {
         "en": "Alexa: door lock (on = lock), gate (off = close), alarm system (on = arm) and heating (percent = °C setpoint); unlocking/opening/disarming only with the device option 'Alexa darf auch öffnen' (no PIN over the Hue emulation); blinds with only up/down work with Alexa",
         "de": "Alexa: Türschloss („ein“ = zusperren), Tor („aus“ = schließen), Alarmanlage („ein“ = scharf) und Heizung (Prozent = °C-Sollwert); Aufsperren/Öffnen/Unscharf nur mit dem Geräte-Haken „Alexa darf auch öffnen“ (ohne PIN über die Hue-Emulation); Rollläden nur mit Auf/Ab gehen mit Alexa"

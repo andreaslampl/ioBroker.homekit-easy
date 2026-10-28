@@ -29,6 +29,16 @@ test('SmartView creates, updates and removes its devices; other devices stay', a
     assert.deepEqual(list.map(d => d.id), ['own', 'sv-a']);
     assert.equal(list[1].alexa, true);
 
+    // so does "Für Alexa umdrehen" of a blind from SmartView
+    r = await adapter.message('smartview.0', 'sync', { devices: [{ id: 'sv-a', type: 'light', name: 'Küche Licht', state: 'knx.0.Licht.Wohnzimmer' }, { id: 'sv-b', type: 'blind', name: 'Rollladen', state: 'knx.0.Rollladen.Wohnzimmer' }] });
+    list = (await api('devices')).body;
+    await api('devices', { method: 'PUT', body: JSON.stringify(list.map(d => (d.id === 'sv-b' ? { ...d, alexa: true, alexaInvert: true } : d))) });
+    await adapter.message('smartview.0', 'sync', { devices: [{ id: 'sv-a', type: 'light', name: 'Küche Licht', state: 'knx.0.Licht.Wohnzimmer' }, { id: 'sv-b', type: 'blind', name: 'Rollladen', state: 'knx.0.Rollladen.Wohnzimmer' }] });
+    list = (await api('devices')).body;
+    assert.equal(list.find(d => d.id === 'sv-b').alexaInvert, true);
+    await adapter.message('smartview.0', 'sync', { devices: [{ id: 'sv-a', type: 'light', name: 'Küche Licht', state: 'knx.0.Licht.Wohnzimmer' }] });
+    list = (await api('devices')).body;
+
     // only SmartView may sync; the device list can be read by anyone
     r = await adapter.message('javascript.0', 'sync', { devices: [] });
     assert.match(r.error, /not allowed/);

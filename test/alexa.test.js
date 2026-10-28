@@ -80,6 +80,13 @@ test('Alexa: discovery, lights for the ticked devices, on/off and percent like a
     await until(() => adapter.foreign['knx.0.Rollladen.Wohnzimmer'].val === 70);
     await put(rolloId, { on: true });
     await until(() => adapter.foreign['knx.0.Rollladen.Wohnzimmer'].val === 0);
+    // "Für Alexa umdrehen": Alexa reversed, the data point the other way round than without the tick
+    await api('devices', { method: 'PUT', body: JSON.stringify(saved.map(d => (d.id === 'rollo' ? { ...d, alexaInvert: true } : d))) });
+    await put(rolloId, { bri: Math.round(0.3 * 254) });
+    await until(() => adapter.foreign['knx.0.Rollladen.Wohnzimmer'].val === 30);
+    await new Promise(r => setTimeout(r, 9000)); // past the echo of Alexa's own command
+    assert.equal((await (await fetch(`${base}/api/${user}/lights/${rolloId}`)).json()).state.bri, Math.round(0.3 * 254), 'reads back what Alexa set');
+    await api('devices', { method: 'PUT', body: JSON.stringify(saved) });
 
     // lock: "ein" locks; "aus" (unlock) is refused without the device option, allowed with it
     const [lockId] = byName('Haustür Schloss');
